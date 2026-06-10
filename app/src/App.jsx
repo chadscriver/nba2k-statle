@@ -29,6 +29,11 @@ const HT_MEAN = { PG: 74.8, SG: 76.7, SF: 78.5, PF: 80.1, C: 82.6 };
 const POS_NAME = { PG: 'Point Guard', SG: 'Shooting Guard', SF: 'Small Forward', PF: 'Power Forward', C: 'Center' };
 const TIERS = ['HOF', 'Gold', 'Silver', 'Bronze'];
 const TIER_COLOR = ['#7E22CE', '#CA8A04', '#6B7280', '#92400E'];
+// import.meta.env.BASE_URL keeps asset paths correct under any deploy base
+// (root on Vercel, the repo subpath on GitHub Pages).
+const BASE = import.meta.env.BASE_URL;
+const TIER_IMG = ['hof', 'gold', 'silver', 'bronze'].map((t) => `${BASE}badges/${t}.png`);
+const headshotSrc = (p) => (p && p.img ? `${BASE}${p.img}` : '');
 
 const SLOTS = [
   { id: 'ARCH', kind: 'arch', label: 'Position & Frame' },
@@ -43,6 +48,19 @@ const SLOTS = [
 
 const SHADOW = '0 1px 2px rgba(10,27,61,0.05), 0 12px 28px -16px rgba(10,27,61,0.16)';
 const C_BG = '#F4F6FB', C_SURFACE = '#FFFFFF', C_SURFACE2 = '#EEF2F9', C_BORDER = '#D4DCEC', C_TEXT = '#0A1B3D', C_MUTED = '#5C6B8C', C_ACCENT = '#1D428A', C_RED = '#C8102E';
+
+function Headshot({ p, size }) {
+  const src = headshotSrc(p);
+  if (!src) return null;
+  return (
+    <img
+      src={src}
+      alt=""
+      onError={(e) => { e.currentTarget.style.display = 'none'; }}
+      style={{ width: size, height: size, borderRadius: Math.round(size * 0.28), objectFit: 'cover', objectPosition: 'center 18%', flexShrink: 0, background: C_SURFACE2, border: `1px solid ${C_BORDER}` }}
+    />
+  );
+}
 
 function chipColor(v) { if (v >= 80) return '#16A34A'; if (v >= 70) return '#84CC16'; if (v >= 60) return '#F59E0B'; return '#EF4444'; }
 function chipText(v) { return (v >= 60 && v < 80) ? '#1a1206' : '#ffffff'; }
@@ -80,9 +98,12 @@ function TierPills({ counts }) {
   const items = counts.map((n, i) => ({ n, i })).filter((x) => x.n > 0);
   if (items.length === 0) return <div style={{ fontSize: 9, color: C_MUTED, marginTop: 4 }}>no badges</div>;
   return (
-    <div style={{ display: 'flex', gap: 3, marginTop: 4 }}>
+    <div style={{ display: 'flex', gap: 4, marginTop: 4 }}>
       {items.map((x) => (
-        <span key={x.i} title={TIERS[x.i]} style={{ width: 15, height: 15, borderRadius: '50%', background: TIER_COLOR[x.i], color: '#fff', fontSize: 9, fontWeight: 700, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>{x.n}</span>
+        <span key={x.i} title={TIERS[x.i]} style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 15, height: 20 }}>
+          <img src={TIER_IMG[x.i]} alt={TIERS[x.i]} onError={(e) => { e.currentTarget.style.display = 'none'; }} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain' }} />
+          <span style={{ position: 'relative', fontSize: 9, fontWeight: 800, color: '#fff', textShadow: '0 1px 2px rgba(0,0,0,0.85)', lineHeight: 1 }}>{x.n}</span>
+        </span>
       ))}
     </div>
   );
@@ -277,10 +298,13 @@ export default function App() {
           {(pending || spinning) ? (
             <div style={{ background: C_SURFACE, border: `1px solid ${C_ACCENT}`, borderRadius: 14, padding: '12px 16px', boxShadow: SHADOW }}>
               <div className="flex items-center justify-between">
-                <div>
+                <div className="flex items-center" style={{ gap: 12 }}>
+                  {show ? <Headshot p={show} size={52} /> : null}
+                  <div>
                   <div style={{ fontSize: 11, color: C_MUTED, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{spinning ? <><span className="live-dot" />Spinning…</> : 'You rolled'}</div>
                   <div key={show ? show.n : 'none'} className="tick" style={{ fontSize: 19, fontWeight: 800 }}>{show ? show.n : '—'}</div>
                   <div style={{ fontSize: 11, color: C_MUTED, marginTop: 1 }}>{show ? show.tm : '\u00A0'}</div>
+                  </div>
                 </div>
                 {show ? (
                   <div className="flex items-center gap-2">
@@ -334,20 +358,29 @@ export default function App() {
                 {pl ? (
                   s.kind === 'arch' ? (
                     <div>
-                      <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
-                        <span style={{ fontSize: 24, fontWeight: 800, lineHeight: 1 }}>{pl.p}</span>
-                        <span style={{ fontSize: 13, color: C_MUTED }}>{pl.ht}</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <Headshot p={pl} size={30} />
+                        <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+                          <span style={{ fontSize: 24, fontWeight: 800, lineHeight: 1 }}>{pl.p}</span>
+                          <span style={{ fontSize: 13, color: C_MUTED }}>{pl.ht}</span>
+                        </div>
                       </div>
                       <div style={{ fontSize: 10, color: C_MUTED, marginTop: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{pl.n}</div>
                     </div>
                   ) : s.kind === 'int' ? (
                     <div>
-                      <div style={{ fontSize: 28, fontWeight: 800, lineHeight: 1, color: numColor(pl.ig) }}>{pl.ig}</div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <Headshot p={pl} size={30} />
+                        <div style={{ fontSize: 28, fontWeight: 800, lineHeight: 1, color: numColor(pl.ig) }}>{pl.ig}</div>
+                      </div>
                       <div style={{ fontSize: 10, color: C_MUTED, marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{pl.n}</div>
                     </div>
                   ) : (
                     <div>
-                      <div style={{ fontSize: 28, fontWeight: 800, lineHeight: 1, color: numColor(pl.c[s.ci]) }}>{pl.c[s.ci]}</div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <Headshot p={pl} size={30} />
+                        <div style={{ fontSize: 28, fontWeight: 800, lineHeight: 1, color: numColor(pl.c[s.ci]) }}>{pl.c[s.ci]}</div>
+                      </div>
                       <div style={{ fontSize: 10, color: C_MUTED, marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{pl.n}</div>
                       <TierPills counts={(pl.b && pl.b[CATS[s.ci].key]) || [0, 0, 0, 0]} />
                     </div>
