@@ -1,0 +1,117 @@
+{
+  "model": "per-position linear regression of 2K overall on 6 category averages",
+  "formula": "overall = intercept + sum(coef[cat]*category_value)",
+  "source": "2kratings.com NBA 2K26, 533 players",
+  "positions": {
+    "PG": {
+      "n": 106,
+      "intercept": -15.426,
+      "coefficients": {
+        "Outside Scoring": 0.5545,
+        "Inside Scoring": 0.179,
+        "Playmaking": 0.335,
+        "Athleticism": 0.1402,
+        "Defense": 0.1185,
+        "Rebounding": -0.0751
+      },
+      "normalized_weight_pct": {
+        "Outside Scoring": 41.8,
+        "Inside Scoring": 13.5,
+        "Playmaking": 25.2,
+        "Athleticism": 10.6,
+        "Defense": 8.9,
+        "Rebounding": 0.0
+      },
+      "cv_mae": 1.33,
+      "cv_r2": 0.94
+    },
+    "SG": {
+      "n": 104,
+      "intercept": -7.755,
+      "coefficients": {
+        "Outside Scoring": 0.551,
+        "Inside Scoring": 0.1354,
+        "Playmaking": 0.1554,
+        "Athleticism": 0.1524,
+        "Defense": 0.2047,
+        "Rebounding": 0.0142
+      },
+      "normalized_weight_pct": {
+        "Outside Scoring": 45.4,
+        "Inside Scoring": 11.2,
+        "Playmaking": 12.8,
+        "Athleticism": 12.6,
+        "Defense": 16.9,
+        "Rebounding": 1.2
+      },
+      "cv_mae": 1.64,
+      "cv_r2": 0.885
+    },
+    "SF": {
+      "n": 110,
+      "intercept": -1.508,
+      "coefficients": {
+        "Outside Scoring": 0.4647,
+        "Inside Scoring": 0.1623,
+        "Playmaking": 0.1198,
+        "Athleticism": 0.1574,
+        "Defense": 0.2002,
+        "Rebounding": 0.0421
+      },
+      "normalized_weight_pct": {
+        "Outside Scoring": 40.5,
+        "Inside Scoring": 14.2,
+        "Playmaking": 10.4,
+        "Athleticism": 13.7,
+        "Defense": 17.5,
+        "Rebounding": 3.7
+      },
+      "cv_mae": 1.449,
+      "cv_r2": 0.884
+    },
+    "PF": {
+      "n": 99,
+      "intercept": 0.029,
+      "coefficients": {
+        "Outside Scoring": 0.3658,
+        "Inside Scoring": 0.2193,
+        "Playmaking": 0.1051,
+        "Athleticism": 0.1676,
+        "Defense": 0.2183,
+        "Rebounding": 0.0486
+      },
+      "normalized_weight_pct": {
+        "Outside Scoring": 32.5,
+        "Inside Scoring": 19.5,
+        "Playmaking": 9.3,
+        "Athleticism": 14.9,
+        "Defense": 19.4,
+        "Rebounding": 4.3
+      },
+      "cv_mae": 1.37,
+      "cv_r2": 0.921
+    },
+    "C": {
+      "n": 114,
+      "intercept": 4.01,
+      "coefficients": {
+        "Outside Scoring": 0.2639,
+        "Inside Scoring": 0.2797,
+        "Playmaking": 0.015,
+        "Athleticism": 0.1277,
+        "Defense": 0.2162,
+        "Rebounding": 0.1608
+      },
+      "normalized_weight_pct": {
+        "Outside Scoring": 24.8,
+        "Inside Scoring": 26.3,
+        "Playmaking": 1.4,
+        "Athleticism": 12.0,
+        "Defense": 20.3,
+        "Rebounding": 15.1
+      },
+      "cv_mae": 1.598,
+      "cv_r2": 0.868
+    }
+  }
+}
