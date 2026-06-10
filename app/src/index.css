@@ -3,4 +3,68 @@
 @tailwind utilities;
 
 html, body, #root { height: 100%; }
-body { margin: 0; background: #F4F6FB; }
+body {
+  margin: 0;
+  background: #F4F6FB;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+button { font-family: inherit; }
+
+:focus-visible { outline: 2px solid #1D428A; outline-offset: 2px; border-radius: 6px; }
+
+/* ---- buttons ---- */
+.btn-red { transition: filter 0.15s ease, transform 0.1s ease; }
+.btn-red:hover:not(:disabled) { filter: brightness(0.88); }
+.btn-red:active:not(:disabled) { transform: scale(0.985); }
+.btn-ghost { transition: border-color 0.15s ease, color 0.15s ease, transform 0.1s ease; }
+.btn-ghost:hover:not(:disabled) { border-color: #1D428A !important; color: #1D428A !important; }
+.btn-ghost:active:not(:disabled) { transform: scale(0.97); }
+
+/* ---- slots ---- */
+.slot { transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, opacity 0.2s ease; }
+.slot-sel:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 14px rgba(10, 27, 61, 0.1), 0 18px 36px -16px rgba(10, 27, 61, 0.22) !important;
+}
+
+/* ---- motion ---- */
+@keyframes tickIn { from { opacity: 0.2; transform: translateY(7px); } to { opacity: 1; transform: none; } }
+.tick { animation: tickIn 0.14s ease-out; }
+
+@keyframes popIn { 0% { transform: scale(0.92); } 60% { transform: scale(1.03); } 100% { transform: scale(1); } }
+.pop { animation: popIn 0.28s cubic-bezier(0.2, 0.9, 0.3, 1.4); }
+
+@keyframes riseIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.rise { opacity: 0; animation: riseIn 0.5s ease-out forwards; }
+.fade-late { opacity: 0; animation: riseIn 0.45s ease-out forwards; animation-delay: 1.05s; }
+
+@keyframes pulseDot { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+.live-dot {
+  display: inline-block;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: #C8102E;
+  margin-right: 5px;
+  vertical-align: 1px;
+  animation: pulseDot 0.9s ease-in-out infinite;
+}
+
+/* ---- responsive grids ---- */
+.slot-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 16px; }
+.end-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+@media (max-width: 600px) {
+  .slot-grid { grid-template-columns: repeat(2, 1fr); }
+  .end-grid { grid-template-columns: 1fr; }
+}
+@media (min-width: 601px) and (max-width: 760px) {
+  .end-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ---- accessibility ---- */
+@media (prefers-reduced-motion: reduce) {
+  .tick, .pop, .rise, .fade-late, .live-dot { animation: none; }
+  .rise, .fade-late { opacity: 1; }
+  .slot, .btn-red, .btn-ghost { transition: none; }
+  .slot-sel:hover { transform: none; }
+}

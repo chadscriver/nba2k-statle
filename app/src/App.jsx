@@ -41,6 +41,7 @@ const SLOTS = [
   { id: 'INT', kind: 'int', label: 'Intangibles' },
 ];
 
+const SHADOW = '0 1px 2px rgba(10,27,61,0.05), 0 12px 28px -16px rgba(10,27,61,0.16)';
 const C_BG = '#F4F6FB', C_SURFACE = '#FFFFFF', C_SURFACE2 = '#EEF2F9', C_BORDER = '#D4DCEC', C_TEXT = '#0A1B3D', C_MUTED = '#5C6B8C', C_ACCENT = '#1D428A', C_RED = '#C8102E';
 
 function chipColor(v) { if (v >= 80) return '#16A34A'; if (v >= 70) return '#84CC16'; if (v >= 60) return '#F59E0B'; return '#EF4444'; }
@@ -82,10 +83,12 @@ export default function App() {
   const [flash, setFlash] = useState(null);
   const [phase, setPhase] = useState('play');
   const [rerolls, setRerolls] = useState({ team: true, any: true });
+  const [lastLock, setLastLock] = useState(null);
+  const [disp, setDisp] = useState(0);
   const iv = useRef(null), to = useRef(null);
 
   function cleanup() { clearInterval(iv.current); clearTimeout(to.current); }
-  function newGame() { cleanup(); setSlots({}); setPending(null); setSpinning(false); setFlash(null); setPhase('play'); setRerolls({ team: true, any: true }); }
+  function newGame() { cleanup(); setSlots({}); setPending(null); setSpinning(false); setFlash(null); setPhase('play'); setRerolls({ team: true, any: true }); setLastLock(null); setDisp(0); }
   useEffect(() => { newGame(); return cleanup; }, []);
 
   const usedNames = Object.values(slots).filter(Boolean).map((p) => p.n);
@@ -115,6 +118,7 @@ export default function App() {
     const ns = { ...slots, [id]: pending };
     setSlots(ns);
     setPending(null);
+    setLastLock(id);
     if (SLOTS.every((s) => ns[s.id])) setPhase('done');
   }
 
@@ -140,18 +144,33 @@ export default function App() {
     return { bp, bodyAdj, overall: Math.max(0, Math.min(99, Math.round(base))) };
   }
 
+  useEffect(() => {
+    if (phase !== 'done') return;
+    const target = result().overall;
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) { setDisp(target); return; }
+    const t0 = performance.now(), dur = 1100;
+    let raf;
+    const step = (t) => {
+      const p = Math.min(1, (t - t0) / dur);
+      setDisp(Math.round((1 - Math.pow(1 - p, 3)) * target));
+      if (p < 1) raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [phase]);
+
   if (phase === 'done') {
     const r = result();
     let totalAttr = 0;
     CATS.forEach((c) => { const pl = slots[c.key]; if (pl) totalAttr += pl.a[c.key].reduce((a, b) => a + b, 0); });
     return (
-      <div style={{ background: C_BG, color: C_TEXT, fontFamily: 'ui-sans-serif, system-ui, sans-serif', minHeight: '100%', padding: 20 }}>
+      <div style={{ background: C_BG, color: C_TEXT, fontFamily: "'Archivo', ui-sans-serif, system-ui, sans-serif", fontVariantNumeric: 'tabular-nums', minHeight: '100%', padding: 20 }}>
         <div style={{ maxWidth: 760, margin: '0 auto' }}>
-          <div style={{ background: C_SURFACE, border: `1px solid ${C_BORDER}`, borderRadius: 16, padding: 18, marginBottom: 14 }}>
+          <div className="rise" style={{ background: C_SURFACE, border: `1px solid ${C_BORDER}`, borderRadius: 16, padding: 18, marginBottom: 14, boxShadow: SHADOW }}>
             <div className="flex items-center justify-between" style={{ flexWrap: 'wrap', gap: 12 }}>
               <div className="flex items-center" style={{ gap: 16 }}>
                 <div style={{ width: 84, height: 84, borderRadius: 14, background: C_SURFACE2, border: `1px solid ${C_BORDER}`, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                  <div style={{ fontSize: 38, fontWeight: 800, lineHeight: 1, color: C_ACCENT }}>{r.overall}</div>
+                  <div style={{ fontSize: 40, fontWeight: 900, lineHeight: 1, color: C_ACCENT }}>{disp}</div>
                   <div style={{ fontSize: 9, color: C_MUTED, letterSpacing: '0.1em', marginTop: 2 }}>OVERALL</div>
                 </div>
                 <div>
@@ -159,10 +178,10 @@ export default function App() {
                   <div style={{ fontSize: 13, color: C_MUTED, marginTop: 2 }}>
                     {slots.ARCH ? slots.ARCH.ht : '—'} frame{r.bodyAdj ? ` (${r.bodyAdj > 0 ? '+' : ''}${r.bodyAdj.toFixed(1)} fit)` : ''}
                   </div>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: C_ACCENT, marginTop: 4 }}>{tierFor(r.overall)}</div>
+                  <div className="fade-late" style={{ fontSize: 13, fontWeight: 700, color: C_RED, marginTop: 4 }}>{tierFor(r.overall)}</div>
                 </div>
               </div>
-              <button onClick={newGame} className="flex items-center gap-2 select-none" style={{ background: C_RED, color: '#FFFFFF', border: 'none', borderRadius: 12, padding: '12px 18px', fontSize: 15, fontWeight: 800, cursor: 'pointer' }}>
+              <button onClick={newGame} className="flex items-center gap-2 select-none btn-red" style={{ background: C_RED, color: '#FFFFFF', border: 'none', borderRadius: 12, padding: '12px 18px', fontSize: 15, fontWeight: 800, cursor: 'pointer' }}>
                 <RotateCcw size={16} /> Build again
               </button>
             </div>
@@ -172,12 +191,12 @@ export default function App() {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
-            {CATS.map((c) => {
+          <div className="end-grid">
+            {CATS.map((c, ci2) => {
               const pl = slots[c.key];
               const val = pl.c[c.ci];
               return (
-                <div key={c.key} style={{ background: C_SURFACE, border: `1px solid ${C_BORDER}`, borderRadius: 12, padding: 14 }}>
+                <div key={c.key} className="rise" style={{ background: C_SURFACE, border: `1px solid ${C_BORDER}`, borderRadius: 12, padding: 14, boxShadow: SHADOW, animationDelay: `${140 + ci2 * 70}ms` }}>
                   <div className="flex items-center" style={{ gap: 8, marginBottom: 10 }}>
                     <Chip v={val} big />
                     <span style={{ fontSize: 14, fontWeight: 700 }}>{c.name}</span>
@@ -196,7 +215,7 @@ export default function App() {
               );
             })}
             {slots.INT ? (
-              <div style={{ background: C_SURFACE, border: `1px solid ${C_BORDER}`, borderRadius: 12, padding: 14 }}>
+              <div className="rise" style={{ background: C_SURFACE, border: `1px solid ${C_BORDER}`, borderRadius: 12, padding: 14, boxShadow: SHADOW, animationDelay: '560ms' }}>
                 <div className="flex items-center" style={{ gap: 8, marginBottom: 10 }}>
                   <Chip v={slots.INT.ig} big />
                   <span style={{ fontSize: 14, fontWeight: 700 }}>Intangibles</span>
@@ -216,16 +235,16 @@ export default function App() {
   const show = spinning ? flash : pending;
 
   return (
-    <div style={{ background: C_BG, color: C_TEXT, fontFamily: 'ui-sans-serif, system-ui, sans-serif', minHeight: '100%', padding: 20 }}>
+    <div style={{ background: C_BG, color: C_TEXT, fontFamily: "'Archivo', ui-sans-serif, system-ui, sans-serif", fontVariantNumeric: 'tabular-nums', minHeight: '100%', padding: 20 }}>
       <div style={{ maxWidth: 720, margin: '0 auto' }}>
         <div className="flex items-center justify-between" style={{ marginBottom: 4 }}>
           <div className="flex items-center gap-2">
-            <span style={{ fontSize: 22, fontWeight: 800, letterSpacing: '-0.02em' }}>2K</span>
-            <span style={{ fontSize: 22, fontWeight: 800, letterSpacing: '-0.02em', color: C_RED }}>STATLE</span>
+            <span style={{ fontSize: 24, fontWeight: 900, fontStyle: 'italic', letterSpacing: '-0.02em' }}>2K</span>
+            <span style={{ fontSize: 24, fontWeight: 900, fontStyle: 'italic', letterSpacing: '-0.02em', color: C_RED }}>STATLE</span>
           </div>
           <div className="flex items-center gap-3">
-            <span style={{ fontSize: 12, color: C_MUTED }}>{filled}/{SLOTS.length} locked</span>
-            <button onClick={newGame} className="flex items-center gap-1 select-none" style={{ background: 'transparent', color: C_MUTED, border: `1px solid ${C_BORDER}`, borderRadius: 8, padding: '5px 9px', fontSize: 12, cursor: 'pointer' }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: '#FFFFFF', background: C_ACCENT, borderRadius: 999, padding: '3px 10px' }}>{filled}/{SLOTS.length} locked</span>
+            <button onClick={newGame} className="flex items-center gap-1 select-none btn-ghost" style={{ background: 'transparent', color: C_MUTED, border: `1px solid ${C_BORDER}`, borderRadius: 8, padding: '5px 9px', fontSize: 12, cursor: 'pointer' }}>
               <RotateCcw size={12} /> Reset
             </button>
           </div>
@@ -240,11 +259,11 @@ export default function App() {
 
         <div style={{ minHeight: 78, marginBottom: 14 }}>
           {(pending || spinning) ? (
-            <div style={{ background: C_SURFACE, border: `1px solid ${C_ACCENT}`, borderRadius: 14, padding: '12px 16px' }}>
+            <div style={{ background: C_SURFACE, border: `1px solid ${C_ACCENT}`, borderRadius: 14, padding: '12px 16px', boxShadow: SHADOW }}>
               <div className="flex items-center justify-between">
                 <div>
-                  <div style={{ fontSize: 11, color: C_MUTED, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{spinning ? 'Spinning…' : 'You rolled'}</div>
-                  <div style={{ fontSize: 19, fontWeight: 800 }}>{show ? show.n : '—'}</div>
+                  <div style={{ fontSize: 11, color: C_MUTED, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{spinning ? <><span className="live-dot" />Spinning…</> : 'You rolled'}</div>
+                  <div key={show ? show.n : 'none'} className="tick" style={{ fontSize: 19, fontWeight: 800 }}>{show ? show.n : '—'}</div>
                   <div style={{ fontSize: 11, color: C_MUTED, marginTop: 1 }}>{show ? show.tm : '\u00A0'}</div>
                 </div>
                 {show ? (
@@ -257,11 +276,11 @@ export default function App() {
               </div>
               {!spinning && pending ? (
                 <div className="flex items-center" style={{ gap: 8, marginTop: 10 }}>
-                  <button onClick={() => reroll('team')} disabled={!rerolls.team || sameTeamCount === 0} className="flex items-center gap-1 select-none"
+                  <button onClick={() => reroll('team')} disabled={!rerolls.team || sameTeamCount === 0} className="flex items-center gap-1 select-none btn-ghost"
                     style={{ background: 'transparent', color: (rerolls.team && sameTeamCount > 0) ? C_ACCENT : C_MUTED, border: `1px solid ${(rerolls.team && sameTeamCount > 0) ? C_ACCENT : C_BORDER}`, borderRadius: 8, padding: '5px 10px', fontSize: 12, fontWeight: 600, cursor: (rerolls.team && sameTeamCount > 0) ? 'pointer' : 'not-allowed', opacity: (rerolls.team && sameTeamCount > 0) ? 1 : 0.45 }}>
                     <RotateCcw size={12} /> Re-roll {pending.tm}
                   </button>
-                  <button onClick={() => reroll('any')} disabled={!rerolls.any} className="flex items-center gap-1 select-none"
+                  <button onClick={() => reroll('any')} disabled={!rerolls.any} className="flex items-center gap-1 select-none btn-ghost"
                     style={{ background: 'transparent', color: rerolls.any ? C_ACCENT : C_MUTED, border: `1px solid ${rerolls.any ? C_ACCENT : C_BORDER}`, borderRadius: 8, padding: '5px 10px', fontSize: 12, fontWeight: 600, cursor: rerolls.any ? 'pointer' : 'not-allowed', opacity: rerolls.any ? 1 : 0.45 }}>
                     <RotateCcw size={12} /> Re-roll anyone
                   </button>
@@ -276,7 +295,7 @@ export default function App() {
           )}
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, marginBottom: 16 }}>
+        <div className="slot-grid">
           {SLOTS.map((s) => {
             const pl = slots[s.id];
             const selectable = pending && !pl;
@@ -284,7 +303,9 @@ export default function App() {
               <div
                 key={s.id}
                 onClick={() => selectable && assign(s.id)}
+                className={`slot${selectable ? ' slot-sel' : ''}${pl && lastLock === s.id ? ' pop' : ''}`}
                 style={{
+                  boxShadow: SHADOW,
                   background: s.kind === 'cat' ? C_SURFACE : C_SURFACE2,
                   border: `1px solid ${selectable ? C_ACCENT : C_BORDER}`,
                   borderRadius: 12, padding: 11, minHeight: 96,
@@ -328,7 +349,7 @@ export default function App() {
         <button
           onClick={spin}
           disabled={!canSpin}
-          className="flex items-center justify-center gap-2 w-full select-none"
+          className="flex items-center justify-center gap-2 w-full select-none btn-red"
           style={{
             background: canSpin ? C_RED : C_SURFACE2,
             color: canSpin ? '#FFFFFF' : C_MUTED,
