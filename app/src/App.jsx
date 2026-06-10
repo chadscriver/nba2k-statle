@@ -28,7 +28,7 @@ const FORM = {
 const HT_MEAN = { PG: 74.8, SG: 76.7, SF: 78.5, PF: 80.1, C: 82.6 };
 const POS_NAME = { PG: 'Point Guard', SG: 'Shooting Guard', SF: 'Small Forward', PF: 'Power Forward', C: 'Center' };
 const TIERS = ['HOF', 'Gold', 'Silver', 'Bronze'];
-const TIER_COLOR = ['#C084FC', '#FBBF24', '#CBD5E1', '#CD7F32'];
+const TIER_COLOR = ['#7E22CE', '#A16207', '#64748B', '#92400E'];
 
 const SLOTS = [
   { id: 'ARCH', kind: 'arch', label: 'Position & Frame' },
@@ -41,10 +41,11 @@ const SLOTS = [
   { id: 'INT', kind: 'int', label: 'Intangibles' },
 ];
 
-const C_BG = '#0E1116', C_SURFACE = '#161A21', C_SURFACE2 = '#1E232C', C_BORDER = '#2A2F3A', C_TEXT = '#F5F7FA', C_MUTED = '#8B93A1', C_ACCENT = '#F97316';
+const C_BG = '#F4F6FB', C_SURFACE = '#FFFFFF', C_SURFACE2 = '#EEF2F9', C_BORDER = '#D4DCEC', C_TEXT = '#0A1B3D', C_MUTED = '#5C6B8C', C_ACCENT = '#1D428A', C_RED = '#C8102E';
 
 function chipColor(v) { if (v >= 80) return '#16A34A'; if (v >= 70) return '#84CC16'; if (v >= 60) return '#F59E0B'; return '#EF4444'; }
 function chipText(v) { return (v >= 60 && v < 80) ? '#1a1206' : '#ffffff'; }
+function numColor(v) { if (v >= 80) return '#15803D'; if (v >= 70) return '#4D7C0F'; if (v >= 60) return '#B45309'; return '#B91C1C'; }
 function tierFor(o) {
   if (o >= 95) return 'Franchise cornerstone';
   if (o >= 90) return 'All-Star';
@@ -161,7 +162,7 @@ export default function App() {
                   <div style={{ fontSize: 13, fontWeight: 700, color: C_ACCENT, marginTop: 4 }}>{tierFor(r.overall)}</div>
                 </div>
               </div>
-              <button onClick={newGame} className="flex items-center gap-2 select-none" style={{ background: C_ACCENT, color: '#1A1206', border: 'none', borderRadius: 12, padding: '12px 18px', fontSize: 15, fontWeight: 800, cursor: 'pointer' }}>
+              <button onClick={newGame} className="flex items-center gap-2 select-none" style={{ background: C_RED, color: '#FFFFFF', border: 'none', borderRadius: 12, padding: '12px 18px', fontSize: 15, fontWeight: 800, cursor: 'pointer' }}>
                 <RotateCcw size={16} /> Build again
               </button>
             </div>
@@ -220,7 +221,7 @@ export default function App() {
         <div className="flex items-center justify-between" style={{ marginBottom: 4 }}>
           <div className="flex items-center gap-2">
             <span style={{ fontSize: 22, fontWeight: 800, letterSpacing: '-0.02em' }}>2K</span>
-            <span style={{ fontSize: 22, fontWeight: 800, letterSpacing: '-0.02em', color: C_ACCENT }}>STATLE</span>
+            <span style={{ fontSize: 22, fontWeight: 800, letterSpacing: '-0.02em', color: C_RED }}>STATLE</span>
           </div>
           <div className="flex items-center gap-3">
             <span style={{ fontSize: 12, color: C_MUTED }}>{filled}/{SLOTS.length} locked</span>
@@ -228,6 +229,10 @@ export default function App() {
               <RotateCcw size={12} /> Reset
             </button>
           </div>
+        </div>
+        <div style={{ display: 'flex', height: 3, width: 104, borderRadius: 2, overflow: 'hidden', margin: '2px 0 14px' }}>
+          <span style={{ flex: 1, background: C_ACCENT }} />
+          <span style={{ flex: 1, background: C_RED }} />
         </div>
         <p style={{ fontSize: 13, color: C_MUTED, margin: '0 0 16px', lineHeight: 1.5 }}>
           Spin a player, then lock him into any open slot — position and frame, intangibles, or his rating in one category. You get two re-rolls a game: one for another player on his team, one for anyone in the league. Ratings stay hidden until you commit, and your overall stays hidden until every slot is filled.
@@ -300,12 +305,12 @@ export default function App() {
                     </div>
                   ) : s.kind === 'int' ? (
                     <div>
-                      <div style={{ fontSize: 28, fontWeight: 800, lineHeight: 1, color: chipColor(pl.ig) }}>{pl.ig}</div>
+                      <div style={{ fontSize: 28, fontWeight: 800, lineHeight: 1, color: numColor(pl.ig) }}>{pl.ig}</div>
                       <div style={{ fontSize: 10, color: C_MUTED, marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{pl.n}</div>
                     </div>
                   ) : (
                     <div>
-                      <div style={{ fontSize: 28, fontWeight: 800, lineHeight: 1, color: chipColor(pl.c[s.ci]) }}>{pl.c[s.ci]}</div>
+                      <div style={{ fontSize: 28, fontWeight: 800, lineHeight: 1, color: numColor(pl.c[s.ci]) }}>{pl.c[s.ci]}</div>
                       <div style={{ fontSize: 10, color: C_MUTED, marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{pl.n}</div>
                       <div style={{ fontSize: 9, color: C_MUTED, marginTop: 2 }}>
                         {(() => { const cnt = (pl.b && pl.b[CATS[s.ci].key]) || [0, 0, 0, 0]; const tot = cnt.reduce((a, b) => a + b, 0); return tot ? `${tot} badge${tot > 1 ? 's' : ''}` : 'no badges'; })()}
@@ -325,9 +330,9 @@ export default function App() {
           disabled={!canSpin}
           className="flex items-center justify-center gap-2 w-full select-none"
           style={{
-            background: canSpin ? C_ACCENT : C_SURFACE2,
-            color: canSpin ? '#1A1206' : C_MUTED,
-            border: `1px solid ${canSpin ? C_ACCENT : C_BORDER}`,
+            background: canSpin ? C_RED : C_SURFACE2,
+            color: canSpin ? '#FFFFFF' : C_MUTED,
+            border: `1px solid ${canSpin ? C_RED : C_BORDER}`,
             borderRadius: 14, padding: 16, fontSize: 16, fontWeight: 800,
             cursor: canSpin ? 'pointer' : 'not-allowed',
           }}
