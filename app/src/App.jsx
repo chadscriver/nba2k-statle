@@ -28,12 +28,12 @@ const FORM = {
 const HT_MEAN = { PG: 74.8, SG: 76.7, SF: 78.5, PF: 80.1, C: 82.6 };
 const POS_NAME = { PG: 'Point Guard', SG: 'Shooting Guard', SF: 'Small Forward', PF: 'Power Forward', C: 'Center' };
 const TIERS = ['HOF', 'Gold', 'Silver', 'Bronze'];
-const TIER_COLOR = ['#7E22CE', '#A16207', '#64748B', '#92400E'];
+const TIER_COLOR = ['#7E22CE', '#CA8A04', '#6B7280', '#92400E'];
 
 const SLOTS = [
   { id: 'ARCH', kind: 'arch', label: 'Position & Frame' },
-  { id: 'OUT', kind: 'cat', ci: 0, label: 'Outside' },
-  { id: 'IN', kind: 'cat', ci: 1, label: 'Inside' },
+  { id: 'OUT', kind: 'cat', ci: 0, label: 'Outside Scoring' },
+  { id: 'IN', kind: 'cat', ci: 1, label: 'Inside Scoring' },
   { id: 'PLY', kind: 'cat', ci: 2, label: 'Playmaking' },
   { id: 'ATH', kind: 'cat', ci: 3, label: 'Athleticism' },
   { id: 'DEF', kind: 'cat', ci: 4, label: 'Defense' },
@@ -71,6 +71,18 @@ function BadgeLine({ counts }) {
         <span key={x.i} style={{ fontSize: 10, fontWeight: 700, color: TIER_COLOR[x.i], border: `1px solid ${TIER_COLOR[x.i]}`, borderRadius: 4, padding: '1px 5px' }}>
           {x.n} {TIERS[x.i]}
         </span>
+      ))}
+    </div>
+  );
+}
+
+function TierPills({ counts }) {
+  const items = counts.map((n, i) => ({ n, i })).filter((x) => x.n > 0);
+  if (items.length === 0) return <div style={{ fontSize: 9, color: C_MUTED, marginTop: 4 }}>no badges</div>;
+  return (
+    <div style={{ display: 'flex', gap: 3, marginTop: 4 }}>
+      {items.map((x) => (
+        <span key={x.i} title={TIERS[x.i]} style={{ width: 15, height: 15, borderRadius: '50%', background: TIER_COLOR[x.i], color: '#fff', fontSize: 9, fontWeight: 700, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>{x.n}</span>
       ))}
     </div>
   );
@@ -310,15 +322,15 @@ export default function App() {
                 className={`slot${selectable ? ' slot-sel' : ''}${pl && lastLock === s.id ? ' pop' : ''}`}
                 style={{
                   boxShadow: SHADOW,
-                  background: s.kind === 'cat' ? C_SURFACE : C_SURFACE2,
+                  background: C_SURFACE,
                   border: `1px solid ${selectable ? C_ACCENT : C_BORDER}`,
-                  borderRadius: 12, padding: 11, minHeight: 96,
+                  borderRadius: 12, padding: 11, minHeight: 104,
                   cursor: selectable ? 'pointer' : 'default',
                   opacity: pending && pl ? 0.5 : 1,
                   display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
                 }}
               >
-                <div style={{ fontSize: 11, fontWeight: 600, color: s.kind === 'cat' ? C_TEXT : C_ACCENT, textTransform: s.kind === 'cat' ? 'none' : 'uppercase', letterSpacing: s.kind === 'cat' ? 0 : '0.06em' }}>{s.label}</div>
+                <div style={{ fontSize: 11, fontWeight: 600, color: C_ACCENT, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{s.label}</div>
                 {pl ? (
                   s.kind === 'arch' ? (
                     <div>
@@ -337,9 +349,7 @@ export default function App() {
                     <div>
                       <div style={{ fontSize: 28, fontWeight: 800, lineHeight: 1, color: numColor(pl.c[s.ci]) }}>{pl.c[s.ci]}</div>
                       <div style={{ fontSize: 10, color: C_MUTED, marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{pl.n}</div>
-                      <div style={{ fontSize: 9, color: C_MUTED, marginTop: 2 }}>
-                        {(() => { const cnt = (pl.b && pl.b[CATS[s.ci].key]) || [0, 0, 0, 0]; const tot = cnt.reduce((a, b) => a + b, 0); return tot ? `${tot} badge${tot > 1 ? 's' : ''}` : 'no badges'; })()}
-                      </div>
+                      <TierPills counts={(pl.b && pl.b[CATS[s.ci].key]) || [0, 0, 0, 0]} />
                     </div>
                   )
                 ) : (

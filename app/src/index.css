@@ -17,9 +17,9 @@ button { font-family: inherit; }
 .btn-red { transition: filter 0.15s ease, transform 0.1s ease; }
 .btn-red:hover:not(:disabled) { filter: brightness(0.88); }
 .btn-red:active:not(:disabled) { transform: scale(0.985); }
-.btn-ghost { transition: border-color 0.15s ease, color 0.15s ease, transform 0.1s ease; }
-.btn-ghost:hover:not(:disabled) { border-color: #1D428A !important; color: #1D428A !important; }
-.btn-ghost:active:not(:disabled) { transform: scale(0.97); }
+.btn-ghost { transition: background-color 0.12s ease, border-color 0.12s ease, color 0.12s ease, transform 0.08s ease; }
+.btn-ghost:hover:not(:disabled) { background: #1D428A !important; border-color: #1D428A !important; color: #FFFFFF !important; }
+.btn-ghost:active:not(:disabled) { transform: translateY(1px) scale(0.97); }
 
 /* ---- slots ---- */
 .slot { transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, opacity 0.2s ease; }
