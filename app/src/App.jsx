@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Dice5, RotateCcw } from 'lucide-react';
-import POOL from './pool.json';
+import NORMAL_POOL from './pool.json';
+import TEAMS from './teams.json';
 
 const CATS = [
   { key: 'OUT', name: 'Outside Scoring', short: 'Outside', ci: 0 },
@@ -34,6 +35,9 @@ const TIER_COLOR = ['#7E22CE', '#CA8A04', '#6B7280', '#92400E'];
 const BASE = import.meta.env.BASE_URL;
 const TIER_IMG = ['hof', 'gold', 'silver', 'bronze'].map((t) => `${BASE}badges/${t}.png`);
 const headshotSrc = (p) => (p && p.img ? `${BASE}${p.img}` : '');
+const teamLogoSrc = (tm) => { const m = TEAMS[tm]; return m && m.logo ? `${BASE}${m.logo}` : ''; };
+
+const MODES = [{ id: 'normal', label: 'Normal' }, { id: 'hard', label: 'Hard' }, { id: 'legends', label: 'Legends' }];
 
 const SLOTS = [
   { id: 'ARCH', kind: 'arch', label: 'Position & Frame' },
@@ -58,6 +62,19 @@ function Headshot({ p, size }) {
       alt=""
       onError={(e) => { e.currentTarget.style.display = 'none'; }}
       style={{ width: size, height: size, borderRadius: Math.round(size * 0.28), objectFit: 'cover', objectPosition: 'center 18%', flexShrink: 0, background: C_SURFACE2, border: `1px solid ${C_BORDER}` }}
+    />
+  );
+}
+
+function TeamLogo({ tm, size }) {
+  const src = teamLogoSrc(tm);
+  if (!src) return null;
+  return (
+    <img
+      src={src}
+      alt=""
+      onError={(e) => { e.currentTarget.style.display = 'none'; }}
+      style={{ width: size, height: size, objectFit: 'contain', flexShrink: 0, verticalAlign: 'middle' }}
     />
   );
 }
@@ -118,14 +135,36 @@ export default function App() {
   const [rerolls, setRerolls] = useState({ team: true, any: true });
   const [lastLock, setLastLock] = useState(null);
   const [disp, setDisp] = useState(0);
+  const [mode, setMode] = useState(() => (typeof localStorage !== 'undefined' && localStorage.getItem('statle.mode')) || 'normal');
+  const [pool, setPool] = useState(NORMAL_POOL);
+  const [poolLoading, setPoolLoading] = useState(false);
   const iv = useRef(null), to = useRef(null);
 
   function cleanup() { clearInterval(iv.current); clearTimeout(to.current); }
   function newGame() { cleanup(); setSlots({}); setPending(null); setSpinning(false); setFlash(null); setPhase('play'); setRerolls({ team: true, any: true }); setLastLock(null); setDisp(0); }
   useEffect(() => { newGame(); return cleanup; }, []);
 
+  // Pool loading: normal is bundled; hard/legends lazy-load so the initial
+  // bundle stays light. Mode is persisted to localStorage.
+  useEffect(() => {
+    localStorage.setItem('statle.mode', mode);
+    if (mode === 'normal') { setPool(NORMAL_POOL); setPoolLoading(false); return; }
+    setPoolLoading(true);
+    let cancelled = false;
+    const loader = mode === 'hard' ? import('./pool_full.json') : import('./pool_legends.json');
+    loader.then((m) => { if (!cancelled) { setPool(m.default); setPoolLoading(false); } });
+    return () => { cancelled = true; };
+  }, [mode]);
+
   const usedNames = Object.values(slots).filter(Boolean).map((p) => p.n);
   const filled = SLOTS.filter((s) => slots[s.id]).length;
+
+  function switchMode(next) {
+    if (next === mode || poolLoading) return;
+    if (filled > 0 && !window.confirm('Abandon this build?')) return;
+    newGame();
+    setMode(next);
+  }
 
   function runSpin(cands) {
     if (cands.length === 0) return;
@@ -142,8 +181,8 @@ export default function App() {
   }
 
   function spin() {
-    if (spinning || pending || phase === 'done') return;
-    runSpin(POOL.filter((p) => !usedNames.includes(p.n)));
+    if (spinning || pending || phase === 'done' || poolLoading) return;
+    runSpin(pool.filter((p) => !usedNames.includes(p.n)));
   }
 
   function assign(id) {
@@ -157,7 +196,7 @@ export default function App() {
 
   function reroll(kind) {
     if (!pending || spinning || !rerolls[kind]) return;
-    const cand = POOL.filter((p) => !usedNames.includes(p.n) && p.n !== pending.n && (kind === 'team' ? p.tm === pending.tm : true));
+    const cand = pool.filter((p) => !usedNames.includes(p.n) && p.n !== pending.n && (kind === 'team' ? p.tm === pending.tm : true));
     if (cand.length === 0) return;
     setRerolls((r) => ({ ...r, [kind]: false }));
     runSpin(cand);
@@ -269,8 +308,8 @@ export default function App() {
     );
   }
 
-  const canSpin = !spinning && !pending;
-  const sameTeamCount = pending ? POOL.filter((p) => !usedNames.includes(p.n) && p.n !== pending.n && p.tm === pending.tm).length : 0;
+  const canSpin = !spinning && !pending && !poolLoading;
+  const sameTeamCount = pending ? pool.filter((p) => !usedNames.includes(p.n) && p.n !== pending.n && p.tm === pending.tm).length : 0;
   const show = spinning ? flash : pending;
 
   return (
@@ -281,7 +320,15 @@ export default function App() {
             <span style={{ fontSize: 24, fontWeight: 900, fontStyle: 'italic', letterSpacing: '-0.02em' }}>2K</span>
             <span style={{ fontSize: 24, fontWeight: 900, fontStyle: 'italic', letterSpacing: '-0.02em', color: C_RED }}>STATLE</span>
           </div>
-          <div className="flex items-center gap-3">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+            <div style={{ display: 'flex', border: `1px solid ${C_BORDER}`, borderRadius: 8, overflow: 'hidden' }}>
+              {MODES.map((m) => (
+                <button key={m.id} onClick={() => switchMode(m.id)} className="select-none"
+                  style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', padding: '5px 8px', border: 'none', cursor: 'pointer', background: mode === m.id ? C_ACCENT : 'transparent', color: mode === m.id ? '#FFFFFF' : C_MUTED }}>
+                  {m.label}
+                </button>
+              ))}
+            </div>
             <span style={{ fontSize: 12, fontWeight: 700, color: '#FFFFFF', background: C_ACCENT, borderRadius: 999, padding: '3px 10px' }}>{filled}/{SLOTS.length} locked</span>
             <button onClick={newGame} className="flex items-center gap-1 select-none btn-ghost" style={{ background: 'transparent', color: C_MUTED, border: `1px solid ${C_BORDER}`, borderRadius: 8, padding: '5px 9px', fontSize: 12, cursor: 'pointer' }}>
               <RotateCcw size={12} /> Reset
@@ -303,7 +350,7 @@ export default function App() {
               <div style={{ minWidth: 0 }}>
                 <div style={{ fontSize: 11, color: C_MUTED, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{spinning ? <><span className="live-dot" />Spinning…</> : 'You rolled'}</div>
                 <div key={show ? show.n : 'none'} className="tick" style={{ fontSize: 19, fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{show ? show.n : '—'}</div>
-                <div style={{ fontSize: 11, color: C_MUTED, marginTop: 1 }}>{show ? show.tm : '\u00A0'}</div>
+                <div style={{ fontSize: 11, color: C_MUTED, marginTop: 1, display: 'flex', alignItems: 'center', gap: 5 }}>{show ? <><TeamLogo tm={show.tm} size={16} />{show.tm}</> : '\u00A0'}</div>
               </div>
               <div style={{ marginLeft: 'auto', alignSelf: 'stretch', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'space-between', padding: '3px 0', flexShrink: 0 }}>
                 {show ? (
@@ -366,7 +413,10 @@ export default function App() {
                   <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 6, marginTop: 8 }}>
                     <div style={{ minWidth: 0 }}>
                       <Headshot p={pl} size={88} />
-                      <div style={{ fontSize: 10, color: C_MUTED, marginTop: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{pl.n}</div>
+                      <div style={{ fontSize: 10, color: C_MUTED, marginTop: 4, display: 'flex', alignItems: 'center', gap: 4, overflow: 'hidden' }}>
+                        <TeamLogo tm={pl.tm} size={12} />
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{pl.n}</span>
+                      </div>
                     </div>
                     {s.kind === 'arch' ? (
                       <div style={{ textAlign: 'right', fontSize: 10, color: C_MUTED, lineHeight: 1.7, whiteSpace: 'nowrap' }}>
