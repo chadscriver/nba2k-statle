@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Dice5, RotateCcw, X } from 'lucide-react';
 import NORMAL_POOL from './pool.json';
 import TEAMS from './teams.json';
+import DAILIES from './dailies.json';
 
 const CATS = [
   { key: 'OUT', name: 'Outside Scoring', short: 'Outside', ci: 0 },
@@ -37,7 +38,7 @@ const TIER_IMG = ['hof', 'gold', 'silver', 'bronze'].map((t) => `${BASE}badges/$
 const headshotSrc = (p) => (p && p.img ? `${BASE}${p.img}` : '');
 const teamLogoSrc = (tm) => { const m = TEAMS[tm]; return m && m.logo ? `${BASE}${m.logo}` : ''; };
 
-const MODES = [{ id: 'normal', label: 'Normal' }, { id: 'hard', label: 'Hard' }, { id: 'legends', label: 'Legends' }];
+const MODES = [{ id: 'normal', label: 'Normal' }, { id: 'hard', label: 'Hard' }, { id: 'legends', label: 'Legends' }, { id: 'daily', label: 'Daily' }];
 
 const CAT_KEYS = ['OUT', 'IN', 'PLY', 'ATH', 'DEF', 'REB'];
 
@@ -95,6 +96,60 @@ function bucket(v) { return v >= 90 ? '🟪' : v >= 80 ? '🟨' : v >= 70 ? '⬜
 function loadGames() { try { return JSON.parse(localStorage.getItem('statle.games')) || []; } catch { return []; } }
 function saveGame(g) { const arr = loadGames(); arr.unshift(g); localStorage.setItem('statle.games', JSON.stringify(arr.slice(0, 200))); }
 function loadDaily() { try { return JSON.parse(localStorage.getItem('statle.daily')) || { streak: 0, lastDaily: null, results: {} }; } catch { return { streak: 0, lastDaily: null, results: {} }; } }
+function loadDailyInProgress() { try { return JSON.parse(localStorage.getItem('statle.dailyInProgress')); } catch { return null; } }
+function saveDailyInProgress(o) { localStorage.setItem('statle.dailyInProgress', JSON.stringify(o)); }
+function clearDailyInProgress() { localStorage.removeItem('statle.dailyInProgress'); }
+
+function xmur3(str) {
+  let h = 1779033703 ^ str.length;
+  for (let i = 0; i < str.length; i++) {
+    h = Math.imul(h ^ str.charCodeAt(i), 3432918353);
+    h = (h << 13) | (h >>> 19);
+  }
+  return () => {
+    h = Math.imul(h ^ (h >>> 16), 2246822507);
+    h = Math.imul(h ^ (h >>> 13), 3266489909);
+    return (h ^= h >>> 16) >>> 0;
+  };
+}
+function mulberry32(a) {
+  return () => {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+const SEED_CHARS = 'abcdefghijklmnopqrstuvwxyz0123456789';
+function randomSeed() { let s = ''; for (let i = 0; i < 6; i++) s += SEED_CHARS[Math.floor(Math.random() * SEED_CHARS.length)]; return s; }
+function makeRng(seed) { return mulberry32(xmur3(seed)()); }
+
+const DAILY_EPOCH = '2026-06-15';
+function dailyNumber() {
+  const [y, m, d] = DAILY_EPOCH.split('-').map(Number);
+  const epoch = new Date(y, m - 1, d);
+  const t = new Date();
+  const today = new Date(t.getFullYear(), t.getMonth(), t.getDate());
+  return Math.round((today - epoch) / 86400000) + 1;
+}
+function shuffle(arr) {
+  const a = arr.slice();
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+// Resolve today's daily set against the NORMAL pool; on pool drift advance to
+// the next set index (per spec) and warn.
+function resolveDailySet(n) {
+  const sets = DAILIES.sets, L = sets.length;
+  for (let k = 0; k < L; k++) {
+    const idx = (((n - 1 + k) % L) + L) % L;
+    const players = sets[idx].players.map((nm) => NORMAL_POOL.find((p) => p.n === nm));
+    if (players.every(Boolean)) return { players, idx };
+    console.warn(`daily: set ${idx} references a missing player (pool drift); advancing`);
+  }
+  return null;
+}
 
 const SLOTS = [
   { id: 'ARCH', kind: 'arch', label: 'Position & Frame' },
@@ -214,18 +269,101 @@ export default function App() {
   const [showBest, setShowBest] = useState(false);
   const [showStats, setShowStats] = useState(false);
   const [shareLabel, setShareLabel] = useState('Share');
+  const [linkLabel, setLinkLabel] = useState('Challenge a friend');
+  const [seed, setSeed] = useState('');
+  const [challengeBanner, setChallengeBanner] = useState(null);
+  const [dailyN, setDailyN] = useState(null);
+  const [dailyOrder, setDailyOrder] = useState([]);
+  const [dailyRevealed, setDailyRevealed] = useState(0);
+  const [dailyPar, setDailyPar] = useState(0);
+  const [dailyPractice, setDailyPractice] = useState(false);
   const iv = useRef(null), to = useRef(null);
   const recorded = useRef(false);
+  const rngRef = useRef(Math.random);
 
   function cleanup() { clearInterval(iv.current); clearTimeout(to.current); }
-  function newGame() { cleanup(); setSlots({}); setPending(null); setSpinning(false); setFlash(null); setPhase('play'); setRerolls({ team: true, any: true }); setLastLock(null); setDisp(0); setShowBest(false); setShareLabel('Share'); recorded.current = false; }
-  useEffect(() => { newGame(); return cleanup; }, []);
+  function resetGameState() {
+    cleanup();
+    setSlots({}); setPending(null); setSpinning(false); setFlash(null); setPhase('play');
+    setRerolls({ team: true, any: true }); setLastLock(null); setDisp(0);
+    setShowBest(false); setShareLabel('Share'); setLinkLabel('Challenge a friend');
+    recorded.current = false;
+  }
 
-  // Pool loading: normal is bundled; hard/legends lazy-load so the initial
-  // bundle stays light. Mode is persisted to localStorage.
+  // Endless game: every game gets a seed (challenge links). All endless
+  // randomness draws from this rng, so the same seed + same choices replays.
+  function startEndless(forcedSeed) {
+    const s = forcedSeed || randomSeed();
+    rngRef.current = makeRng(s);
+    setSeed(s);
+    setChallengeBanner(forcedSeed || null);
+    setDailyN(null); setDailyOrder([]); setDailyRevealed(0); setDailyPractice(false);
+    resetGameState();
+  }
+
+  // Daily Gauntlet setup: resolve today's set, recompute par locally, resume an
+  // in-progress attempt, or show the summary if today is already done.
+  function setupDaily(practice) {
+    const n = dailyNumber();
+    const resolved = resolveDailySet(n);
+    setChallengeBanner(null);
+    setDailyN(n);
+    if (!resolved) { setDailyPar(0); setDailyOrder([]); setDailyRevealed(0); setDailyPractice(false); resetGameState(); return; }
+    setDailyPar(bestArrangement(resolved.players).overall);
+    const doneToday = !!(loadDaily().results || {})[n];
+    resetGameState();
+    if (!practice && doneToday) {
+      setDailyPractice(false); setDailyOrder(shuffle(resolved.players)); setDailyRevealed(0);
+      setPhase('daily-summary');
+      return;
+    }
+    if (practice) {
+      setDailyPractice(true); setDailyOrder(shuffle(resolved.players)); setDailyRevealed(0);
+      return;
+    }
+    setDailyPractice(false);
+    const ip = loadDailyInProgress();
+    if (ip && ip.n === n) {  // resume — preserves order, kills order-scumming
+      const order = ip.order.map((nm) => resolved.players.find((p) => p.n === nm)).filter(Boolean);
+      const restored = {};
+      Object.entries(ip.slots).forEach(([sid, nm]) => { const pl = resolved.players.find((p) => p.n === nm); if (pl) restored[sid] = pl; });
+      setDailyOrder(order.length === 8 ? order : shuffle(resolved.players));
+      setDailyRevealed(Object.keys(restored).length);
+      setSlots(restored);
+      if (SLOTS.every((s) => restored[s.id])) setPhase('done');
+    } else {
+      setDailyOrder(shuffle(resolved.players)); setDailyRevealed(0);
+    }
+  }
+
+  function setupForMode(m, forcedSeed) {
+    if (m === 'daily') setupDaily(false); else startEndless(forcedSeed);
+  }
+  function newGame() {
+    if (mode === 'daily') setupDaily(dailyPractice); else startEndless();
+  }
+
+  // Mount: honor ?seed (+ optional &mode) for challenge links, else set up the
+  // persisted mode.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const urlSeed = params.get('seed');
+    const urlMode = params.get('mode');
+    let m = mode;
+    if (urlSeed) {
+      m = ['normal', 'hard', 'legends'].includes(urlMode) ? urlMode : (mode === 'daily' ? 'normal' : mode);
+      if (m !== mode) setMode(m);
+    }
+    setupForMode(m, urlSeed || null);
+    return cleanup;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Pool loading: normal/daily use the bundled normal pool; hard/legends
+  // lazy-load so the initial bundle stays light. Mode persists to localStorage.
   useEffect(() => {
     localStorage.setItem('statle.mode', mode);
-    if (mode === 'normal') { setPool(NORMAL_POOL); setPoolLoading(false); return; }
+    if (mode === 'normal' || mode === 'daily') { setPool(NORMAL_POOL); setPoolLoading(false); return; }
     setPoolLoading(true);
     let cancelled = false;
     const loader = mode === 'hard' ? import('./pool_full.json') : import('./pool_legends.json');
@@ -239,26 +377,41 @@ export default function App() {
   function switchMode(next) {
     if (next === mode || poolLoading) return;
     if (filled > 0 && !window.confirm('Abandon this build?')) return;
-    newGame();
     setMode(next);
+    setupForMode(next, null);
+  }
+
+  function reveal() {
+    if (pending || phase !== 'play' || mode !== 'daily' || dailyRevealed >= 8) return;
+    setPending(dailyOrder[dailyRevealed]);
+    setDailyRevealed((r) => r + 1);
   }
 
   function runSpin(cands) {
     if (cands.length === 0) return;
+    const rnd = rngRef.current || Math.random;
     setPending(null);
     setSpinning(true);
-    setFlash(cands[Math.floor(Math.random() * cands.length)]);
-    iv.current = setInterval(() => setFlash(cands[Math.floor(Math.random() * cands.length)]), 70);
+    // Draw a fixed number of rng values up front (flash frames + duration +
+    // result) so rng consumption per spin is constant regardless of animation
+    // timing — that is what makes a seed replay identically.
+    const pick = () => cands[Math.floor(rnd() * cands.length)];
+    const frames = []; for (let i = 0; i < 20; i++) frames.push(pick());
+    const dur = 900 + rnd() * 500;
+    const result = pick();
+    let fi = 0;
+    setFlash(frames[0]);
+    iv.current = setInterval(() => { fi = (fi + 1) % frames.length; setFlash(frames[fi]); }, 70);
     to.current = setTimeout(() => {
       clearInterval(iv.current);
-      setPending(cands[Math.floor(Math.random() * cands.length)]);
+      setPending(result);
       setFlash(null);
       setSpinning(false);
-    }, 900 + Math.random() * 500);
+    }, dur);
   }
 
   function spin() {
-    if (spinning || pending || phase === 'done' || poolLoading) return;
+    if (spinning || pending || phase === 'done' || poolLoading || mode === 'daily') return;
     runSpin(pool.filter((p) => !usedNames.includes(p.n)));
   }
 
@@ -268,6 +421,13 @@ export default function App() {
     setSlots(ns);
     setPending(null);
     setLastLock(id);
+    // Daily counting attempt: persist progress on every lock so a refresh
+    // resumes the same order/slots (consumed at the first lock).
+    if (mode === 'daily' && !dailyPractice) {
+      const slotNames = {};
+      Object.entries(ns).forEach(([k, v]) => { slotNames[k] = v.n; });
+      saveDailyInProgress({ n: dailyN, order: dailyOrder.map((p) => p.n), slots: slotNames });
+    }
     if (SLOTS.every((s) => ns[s.id])) setPhase('done');
   }
 
@@ -332,26 +492,30 @@ export default function App() {
     return () => cancelAnimationFrame(raf);
   }, [phase]);
 
-  // Record each completed game once to the localStorage archive (newest first, cap 200).
+  // Record each completed game once. Daily writes its result + streak and
+  // clears the in-progress key; practice games are never recorded.
   useEffect(() => {
     if (phase !== 'done' || !analysis || recorded.current) return;
     recorded.current = true;
+    if (mode === 'daily' && dailyPractice) return;
     const r = result();
     const slotNames = {};
     SLOTS.forEach((s) => { slotNames[s.id] = slots[s.id].n; });
-    saveGame({
-      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-      dateISO: new Date().toISOString(),
-      mode,
-      overall: r.overall,
-      best: analysis.bestRes.overall,
-      eff: analysis.eff,
-      perfect: analysis.perfect,
-      rerolls: (rerolls.team ? 0 : 1) + (rerolls.any ? 0 : 1),
-      seed: null,
-      daily: null,
-      slots: slotNames,
-    });
+    const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const dateISO = new Date().toISOString();
+    if (mode === 'daily') {
+      const ds = loadDaily();
+      ds.results = ds.results || {};
+      ds.results[dailyN] = { overall: r.overall, best: dailyPar, perfect: analysis.perfect };
+      let streak = 0;
+      for (let k = dailyN; ds.results[k]; k--) streak++;
+      ds.streak = streak; ds.lastDaily = dailyN;
+      localStorage.setItem('statle.daily', JSON.stringify(ds));
+      clearDailyInProgress();
+      saveGame({ id, dateISO, mode: 'daily', overall: r.overall, best: dailyPar, eff: analysis.eff, perfect: analysis.perfect, rerolls: 0, seed: null, daily: dailyN, slots: slotNames });
+    } else {
+      saveGame({ id, dateISO, mode, overall: r.overall, best: analysis.bestRes.overall, eff: analysis.eff, perfect: analysis.perfect, rerolls: (rerolls.team ? 0 : 1) + (rerolls.any ? 0 : 1), seed, daily: null, slots: slotNames });
+    }
   }, [phase, analysis]);
 
   function shareText() {
@@ -362,12 +526,48 @@ export default function App() {
       if (s.kind === 'int') return bucket(pl.ig);
       return bucket(pl.c[s.ci]);
     }).join('');
-    return `2K STATLE — ${r.overall} OVR (best ${analysis.bestRes.overall})\n${squares}\n${SHARE_URL}`;
+    const head = mode === 'daily'
+      ? `2K STATLE Daily #${dailyN} — ${r.overall}/${dailyPar}`
+      : `2K STATLE — ${r.overall} OVR (best ${analysis.bestRes.overall})`;
+    return `${head}\n${squares}\n${SHARE_URL}`;
   }
   async function handleShare() {
     const text = shareText();
     if (navigator.share) { try { await navigator.share({ text }); } catch (e) { /* cancelled */ } return; }
     try { await navigator.clipboard.writeText(text); setShareLabel('Copied!'); setTimeout(() => setShareLabel('Share'), 1500); } catch (e) { /* ignore */ }
+  }
+  async function handleChallenge() {
+    const url = `${window.location.origin}${window.location.pathname}?seed=${seed}&mode=${mode}`;
+    try { await navigator.clipboard.writeText(url); setLinkLabel('Link copied!'); setTimeout(() => setLinkLabel('Challenge a friend'), 1500); } catch (e) { /* ignore */ }
+  }
+
+  if (phase === 'daily-summary') {
+    const res = (loadDaily().results || {})[dailyN] || {};
+    const dstreak = loadDaily().streak || 0;
+    return (
+      <div style={{ background: C_BG, color: C_TEXT, fontFamily: "'Archivo', ui-sans-serif, system-ui, sans-serif", fontVariantNumeric: 'tabular-nums', minHeight: '100%', padding: 20 }}>
+        <div style={{ maxWidth: 720, margin: '0 auto' }}>
+          <div className="flex items-center justify-between" style={{ marginBottom: 14, flexWrap: 'wrap', gap: 8 }}>
+            <div className="flex items-center gap-2">
+              <span style={{ fontSize: 24, fontWeight: 900, fontStyle: 'italic', letterSpacing: '-0.02em' }}>2K</span>
+              <span style={{ fontSize: 24, fontWeight: 900, fontStyle: 'italic', letterSpacing: '-0.02em', color: C_RED }}>STATLE</span>
+            </div>
+            <div style={{ display: 'flex', border: `1px solid ${C_BORDER}`, borderRadius: 8, overflow: 'hidden' }}>
+              {MODES.map((m) => (
+                <button key={m.id} onClick={() => switchMode(m.id)} className="select-none" style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', padding: '5px 8px', border: 'none', cursor: 'pointer', background: mode === m.id ? C_ACCENT : 'transparent', color: mode === m.id ? '#FFFFFF' : C_MUTED }}>{m.label}</button>
+              ))}
+            </div>
+          </div>
+          <div className="rise" style={{ background: C_SURFACE, border: `1px solid ${C_BORDER}`, borderRadius: 16, padding: 24, boxShadow: SHADOW, textAlign: 'center' }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: C_ACCENT, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Daily #{dailyN}</div>
+            <div style={{ fontSize: 44, fontWeight: 900, color: C_ACCENT, marginTop: 8 }}>{res.overall ?? '—'} <span style={{ fontSize: 18, color: C_MUTED, fontWeight: 700 }}>/ par {dailyPar}</span></div>
+            {res.perfect ? <div style={{ fontSize: 14, fontWeight: 800, color: C_RED, marginTop: 4 }}>Perfect build</div> : null}
+            <div style={{ fontSize: 13, color: C_MUTED, marginTop: 10 }}>You've already played today's Gauntlet{dstreak ? ` — streak ${dstreak}` : ''}. Come back tomorrow for #{dailyN + 1}.</div>
+            <button onClick={() => setupDaily(true)} className="select-none btn-ghost" style={{ marginTop: 16, background: 'transparent', color: C_ACCENT, border: `1px solid ${C_BORDER}`, borderRadius: 12, padding: '12px 18px', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>Practice (doesn't count)</button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   if (phase === 'done') {
@@ -382,7 +582,7 @@ export default function App() {
               <div className="flex items-center" style={{ gap: 16 }}>
                 <div style={{ width: 84, height: 84, borderRadius: 14, background: C_SURFACE2, border: `1px solid ${C_BORDER}`, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
                   <div style={{ fontSize: 40, fontWeight: 900, lineHeight: 1, color: C_ACCENT }}>{disp}</div>
-                  <div style={{ fontSize: 9, color: C_MUTED, letterSpacing: '0.1em', marginTop: 2 }}>OVERALL</div>
+                  <div style={{ fontSize: 9, color: C_MUTED, letterSpacing: '0.1em', marginTop: 2 }}>{mode === 'daily' ? `/ PAR ${dailyPar}` : 'OVERALL'}</div>
                 </div>
                 <div>
                   <div style={{ fontSize: 20, fontWeight: 800 }}>{POS_NAME[r.bp]}</div>
@@ -408,6 +608,11 @@ export default function App() {
                 <button onClick={handleShare} className="select-none btn-ghost" style={{ background: 'transparent', color: C_ACCENT, border: `1px solid ${C_BORDER}`, borderRadius: 12, padding: '12px 16px', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>
                   {shareLabel}
                 </button>
+                {mode !== 'daily' ? (
+                  <button onClick={handleChallenge} className="select-none btn-ghost" style={{ background: 'transparent', color: C_ACCENT, border: `1px solid ${C_BORDER}`, borderRadius: 12, padding: '12px 16px', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>
+                    {linkLabel}
+                  </button>
+                ) : null}
                 <button onClick={newGame} className="flex items-center gap-2 select-none btn-red" style={{ background: C_RED, color: '#FFFFFF', border: 'none', borderRadius: 12, padding: '12px 18px', fontSize: 15, fontWeight: 800, cursor: 'pointer' }}>
                   <RotateCcw size={16} /> Build again
                 </button>
@@ -480,6 +685,7 @@ export default function App() {
   }
 
   const canSpin = !spinning && !pending && !poolLoading;
+  const canReveal = mode === 'daily' && !pending && dailyRevealed < 8;
   const sameTeamCount = pending ? pool.filter((p) => !usedNames.includes(p.n) && p.n !== pending.n && p.tm === pending.tm).length : 0;
   const show = spinning ? flash : pending;
 
@@ -514,8 +720,17 @@ export default function App() {
           <span style={{ flex: 1, background: C_RED }} />
         </div>
         <p style={{ fontSize: 13, color: C_MUTED, margin: '0 0 16px', lineHeight: 1.5 }}>
-          Spin a player, then lock him into any open slot — position and frame, intangibles, or his rating in one category. You get two re-rolls a game: one for another player on his team, one for anyone in the league. Ratings stay hidden until you commit, and your overall stays hidden until every slot is filled.
+          {mode === 'daily'
+            ? "Today's Gauntlet: reveal eight players one at a time and lock each into an open slot before the next reveal. No re-rolls — beat par. One counting attempt per day."
+            : 'Spin a player, then lock him into any open slot — position and frame, intangibles, or his rating in one category. You get two re-rolls a game: one for another player on his team, one for anyone in the league. Ratings stay hidden until you commit, and your overall stays hidden until every slot is filled.'}
         </p>
+
+        {challengeBanner ? (
+          <div style={{ fontSize: 12, fontWeight: 700, color: C_ACCENT, marginBottom: 10 }}>Challenge seed {challengeBanner}</div>
+        ) : null}
+        {mode === 'daily' && dailyPractice ? (
+          <div style={{ fontSize: 12, fontWeight: 700, color: C_RED, marginBottom: 10 }}>Practice — doesn't count</div>
+        ) : null}
 
         <div className="rollzone">
           {(pending || spinning) ? (
@@ -535,7 +750,7 @@ export default function App() {
                     <span style={{ fontSize: 12, fontWeight: 700, color: C_ACCENT, border: `1px solid ${C_BORDER}`, borderRadius: 8, padding: '3px 8px' }}>{show.o} OVR</span>
                   </div>
                 ) : <span />}
-                {!spinning && pending ? (
+                {mode !== 'daily' && !spinning && pending ? (
                   <div className="flex items-center" style={{ gap: 8 }}>
                     <button onClick={() => reroll('team')} disabled={!rerolls.team || sameTeamCount === 0} className="flex items-center gap-1 select-none btn-ghost"
                       style={{ background: 'transparent', color: (rerolls.team && sameTeamCount > 0) ? C_ACCENT : C_MUTED, border: `1px solid ${(rerolls.team && sameTeamCount > 0) ? C_ACCENT : C_BORDER}`, borderRadius: 8, padding: '5px 10px', fontSize: 12, fontWeight: 600, cursor: (rerolls.team && sameTeamCount > 0) ? 'pointer' : 'not-allowed', opacity: (rerolls.team && sameTeamCount > 0) ? 1 : 0.45 }}>
@@ -610,21 +825,39 @@ export default function App() {
           })}
         </div>
 
-        <button
-          onClick={spin}
-          disabled={!canSpin}
-          className="flex items-center justify-center gap-2 w-full select-none btn-red"
-          style={{
-            background: canSpin ? C_RED : C_SURFACE2,
-            color: canSpin ? '#FFFFFF' : C_MUTED,
-            border: `1px solid ${canSpin ? C_RED : C_BORDER}`,
-            borderRadius: 14, padding: 16, fontSize: 16, fontWeight: 800,
-            cursor: canSpin ? 'pointer' : 'not-allowed',
-          }}
-        >
-          <Dice5 size={18} />
-          {spinning ? 'Spinning…' : pending ? 'Lock your player into a slot' : 'Spin'}
-        </button>
+        {mode === 'daily' ? (
+          <button
+            onClick={reveal}
+            disabled={!canReveal}
+            className="flex items-center justify-center gap-2 w-full select-none btn-red"
+            style={{
+              background: canReveal ? C_RED : C_SURFACE2,
+              color: canReveal ? '#FFFFFF' : C_MUTED,
+              border: `1px solid ${canReveal ? C_RED : C_BORDER}`,
+              borderRadius: 14, padding: 16, fontSize: 16, fontWeight: 800,
+              cursor: canReveal ? 'pointer' : 'not-allowed',
+            }}
+          >
+            <Dice5 size={18} />
+            {pending ? 'Lock your player into a slot' : dailyRevealed >= 8 ? 'All players revealed' : `Reveal next player (${dailyRevealed}/8)`}
+          </button>
+        ) : (
+          <button
+            onClick={spin}
+            disabled={!canSpin}
+            className="flex items-center justify-center gap-2 w-full select-none btn-red"
+            style={{
+              background: canSpin ? C_RED : C_SURFACE2,
+              color: canSpin ? '#FFFFFF' : C_MUTED,
+              border: `1px solid ${canSpin ? C_RED : C_BORDER}`,
+              borderRadius: 14, padding: 16, fontSize: 16, fontWeight: 800,
+              cursor: canSpin ? 'pointer' : 'not-allowed',
+            }}
+          >
+            <Dice5 size={18} />
+            {spinning ? 'Spinning…' : pending ? 'Lock your player into a slot' : 'Spin'}
+          </button>
+        )}
       </div>
 
       {showStats ? (() => {
