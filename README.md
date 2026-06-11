@@ -47,6 +47,7 @@ python scripts/build_pools.py       # 4. pools            -> app/src/pool*.json
 | `scripts/fetch_headshots.py` | Maps every current **and** historic player to an NBA id (nba_api static list, incl. retired) and pulls `cdn.nba.com` headshots. One image per human (no era in slug), skips existing. Multiple-id names are **not guessed** | `app/public/headshots/*.png`, `data/headshot_ambiguous.csv`, `data/headshot_misses.csv` |
 | `scripts/fetch_logos.py` | Downloads the **era-correct** logo from each team's own page (Sonics, teal Hornets, etc.), rasterizes SVG→PNG via `qlmanage`; CDN fallback for current teams | `app/public/logos/*.png`, `app/src/teams.json` |
 | `scripts/build_pools.py` | Builds the three player pools from the CSVs + headshots on disk. Folds in the weight/wingspan merge (replaces the old `add_body_to_pool.py`). Self-checks every regenerated current player against the shipped `pool.json` and aborts on any field drift | `app/src/pool.json`, `app/src/pool_full.json`, `app/src/pool_legends.json` |
+| `scripts/mine_dailies.py` | Mines Daily Gauntlet sets from the normal pool — 8-player sets whose optimal arrangement scores 99, ranked by the gap to the second-best (a "strict" set is one a single misplacement drops below 99). `--samples N` to widen the search (20–40 min default) | `app/src/dailies.json` |
 
 **Pools** (exact entry shape `n, p, tm, o, hi, ht, ig, c, a, b, img, wt, ws`):
 `pool.json` = current top-10-per-team; `pool_full.json` = all current; `pool_legends.json`
@@ -59,6 +60,30 @@ classic = full label) to `{ "logo": "logos/<file>", "season": <season|null> }`.
 > Historic note: 2K lists some deep-bench classic players with no ratings (`--`), and a
 > few share a name with other NBA players. Unrated players are skipped; ambiguous names
 > are parked in `headshot_ambiguous.csv` for manual resolution rather than guessed.
+
+## Game modes & client state
+
+The app (`app/`) reads the generated pools and runs entirely client-side.
+
+- **Modes** (segmented control in the header): **Normal** (top 10/team), **Hard**
+  (full league, lazy-loaded), **Legends** (classic teams, lazy-loaded), and **Daily**.
+  All endless modes share the same rules (two re-rolls). Mode persists to localStorage.
+- **Daily Gauntlet**: a fixed 8-player set per day (from `dailies.json`, epoch
+  `2026-06-15` = #1). Reveal players one at a time and lock each before the next — no
+  spinning, no re-rolls. Score is framed against **par** (the set's best-possible
+  overall, recomputed locally). One counting attempt per day, resumable on refresh;
+  replays after that are unscored **Practice**.
+- **Best-possible / efficiency**: on completion the app brute-forces all 40,320
+  arrangements of the locked 8 to show the optimal overall, your efficiency, and a
+  "See best build" breakdown.
+- **Challenge links** (endless only): every game has a seed; visiting
+  `?seed=<seed>&mode=<mode>` replays the exact same roll sequence. "Challenge a friend"
+  copies the link.
+- **Stats & share**: a Stats modal summarizes the local archive; Share produces an
+  emoji-grid result string.
+
+localStorage keys: `statle.mode`, `statle.games` (archive, cap 200), `statle.daily`
+(`{ streak, lastDaily, results }`), `statle.dailyInProgress` (resume token).
 
 ## Why CSV/JSON and not .xlsx
 
