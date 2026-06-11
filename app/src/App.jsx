@@ -166,15 +166,35 @@ const SHADOW = '0 1px 2px rgba(10,27,61,0.05), 0 12px 28px -16px rgba(10,27,61,0
 const C_BG = '#F4F6FB', C_SURFACE = '#FFFFFF', C_SURFACE2 = '#EEF2F9', C_BORDER = '#D4DCEC', C_TEXT = '#0A1B3D', C_MUTED = '#5C6B8C', C_ACCENT = '#1D428A', C_RED = '#C8102E';
 
 function Headshot({ p, size }) {
-  const src = headshotSrc(p);
-  if (!src) return null;
+  const hs = headshotSrc(p);
+  const logo = teamLogoSrc(p && p.tm);
+  if (!hs && !logo) return null;
+  const rad = Math.round(size * 0.28);
+  const badge = Math.max(20, Math.round(size * 0.3));
   return (
-    <img
-      src={src}
-      alt=""
-      onError={(e) => { e.currentTarget.style.display = 'none'; }}
-      style={{ width: size, height: size, borderRadius: Math.round(size * 0.28), objectFit: 'cover', objectPosition: 'center 18%', flexShrink: 0, background: C_SURFACE2, border: `1px solid ${C_BORDER}` }}
-    />
+    <span data-hswrap="1" style={{ position: 'relative', display: 'inline-block', width: size, height: size, flexShrink: 0 }}>
+      <span style={{ position: 'absolute', inset: 0, borderRadius: rad, background: C_SURFACE2, border: `1px solid ${C_BORDER}`, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        {logo ? <img src={logo} alt="" onError={(e) => { e.currentTarget.style.display = 'none'; }} style={{ width: '66%', height: '66%', objectFit: 'contain' }} /> : null}
+        {hs ? (
+          <img
+            src={hs}
+            alt=""
+            onError={(e) => {
+              e.currentTarget.style.display = 'none';
+              const wrap = e.currentTarget.closest('[data-hswrap]');
+              const bd = wrap && wrap.querySelector('[data-teambadge]');
+              if (bd) bd.style.display = 'none';
+            }}
+            style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 18%' }}
+          />
+        ) : null}
+      </span>
+      {hs && logo ? (
+        <span data-teambadge="1" style={{ position: 'absolute', right: -4, bottom: -4, width: badge, height: badge, borderRadius: '50%', background: C_SURFACE, border: `1px solid ${C_BORDER}`, boxShadow: '0 1px 3px rgba(10,27,61,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <img src={logo} alt="" onError={(e) => { e.currentTarget.parentElement.style.display = 'none'; }} style={{ width: '72%', height: '72%', objectFit: 'contain' }} />
+        </span>
+      ) : null}
+    </span>
   );
 }
 
@@ -739,7 +759,7 @@ export default function App() {
               <div style={{ minWidth: 0 }}>
                 <div style={{ fontSize: 11, color: C_MUTED, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{spinning ? <><span className="live-dot" />Spinning…</> : 'You rolled'}</div>
                 <div key={show ? show.n : 'none'} className="tick" style={{ fontSize: 19, fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{show ? show.n : '—'}</div>
-                <div style={{ fontSize: 11, color: C_MUTED, marginTop: 1, display: 'flex', alignItems: 'center', gap: 5 }}>{show ? <><TeamLogo tm={show.tm} size={16} />{show.tm}</> : '\u00A0'}</div>
+                <div style={{ fontSize: 11, color: C_MUTED, marginTop: 1 }}>{show ? show.tm : '\u00A0'}</div>
               </div>
               <div style={{ marginLeft: 'auto', alignSelf: 'stretch', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'space-between', padding: '3px 0', flexShrink: 0 }}>
                 {show ? (
@@ -802,10 +822,7 @@ export default function App() {
                   <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 6, marginTop: 8 }}>
                     <div style={{ minWidth: 0 }}>
                       <Headshot p={pl} size={88} />
-                      <div style={{ fontSize: 10, color: C_MUTED, marginTop: 4, display: 'flex', alignItems: 'center', gap: 4, overflow: 'hidden' }}>
-                        <TeamLogo tm={pl.tm} size={12} />
-                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{pl.n}</span>
-                      </div>
+                      <div style={{ fontSize: 10, color: C_MUTED, marginTop: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{pl.n}</div>
                     </div>
                     {s.kind === 'arch' ? (
                       <div style={{ textAlign: 'right', fontSize: 10, color: C_MUTED, lineHeight: 1.7, whiteSpace: 'nowrap' }}>
