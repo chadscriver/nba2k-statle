@@ -90,6 +90,12 @@ function bestArrangement(players) {
            overall: Math.max(0, Math.min(99, Math.round(best))), asg };
 }
 
+const SHARE_URL = 'https://chadscriver.github.io/nba2k-statle/';
+function bucket(v) { return v >= 90 ? '🟪' : v >= 80 ? '🟨' : v >= 70 ? '⬜' : '🟫'; }
+function loadGames() { try { return JSON.parse(localStorage.getItem('statle.games')) || []; } catch { return []; } }
+function saveGame(g) { const arr = loadGames(); arr.unshift(g); localStorage.setItem('statle.games', JSON.stringify(arr.slice(0, 200))); }
+function loadDaily() { try { return JSON.parse(localStorage.getItem('statle.daily')) || { streak: 0, lastDaily: null, results: {} }; } catch { return { streak: 0, lastDaily: null, results: {} }; } }
+
 const SLOTS = [
   { id: 'ARCH', kind: 'arch', label: 'Position & Frame' },
   { id: 'OUT', kind: 'cat', ci: 0, label: 'Outside Scoring' },
@@ -206,10 +212,13 @@ export default function App() {
   const [pool, setPool] = useState(NORMAL_POOL);
   const [poolLoading, setPoolLoading] = useState(false);
   const [showBest, setShowBest] = useState(false);
+  const [showStats, setShowStats] = useState(false);
+  const [shareLabel, setShareLabel] = useState('Share');
   const iv = useRef(null), to = useRef(null);
+  const recorded = useRef(false);
 
   function cleanup() { clearInterval(iv.current); clearTimeout(to.current); }
-  function newGame() { cleanup(); setSlots({}); setPending(null); setSpinning(false); setFlash(null); setPhase('play'); setRerolls({ team: true, any: true }); setLastLock(null); setDisp(0); setShowBest(false); }
+  function newGame() { cleanup(); setSlots({}); setPending(null); setSpinning(false); setFlash(null); setPhase('play'); setRerolls({ team: true, any: true }); setLastLock(null); setDisp(0); setShowBest(false); setShareLabel('Share'); recorded.current = false; }
   useEffect(() => { newGame(); return cleanup; }, []);
 
   // Pool loading: normal is bundled; hard/legends lazy-load so the initial
@@ -323,6 +332,44 @@ export default function App() {
     return () => cancelAnimationFrame(raf);
   }, [phase]);
 
+  // Record each completed game once to the localStorage archive (newest first, cap 200).
+  useEffect(() => {
+    if (phase !== 'done' || !analysis || recorded.current) return;
+    recorded.current = true;
+    const r = result();
+    const slotNames = {};
+    SLOTS.forEach((s) => { slotNames[s.id] = slots[s.id].n; });
+    saveGame({
+      id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      dateISO: new Date().toISOString(),
+      mode,
+      overall: r.overall,
+      best: analysis.bestRes.overall,
+      eff: analysis.eff,
+      perfect: analysis.perfect,
+      rerolls: (rerolls.team ? 0 : 1) + (rerolls.any ? 0 : 1),
+      seed: null,
+      daily: null,
+      slots: slotNames,
+    });
+  }, [phase, analysis]);
+
+  function shareText() {
+    const r = result();
+    const squares = SLOTS.map((s) => {
+      const pl = slots[s.id];
+      if (s.kind === 'arch') return bucket(pl.o);
+      if (s.kind === 'int') return bucket(pl.ig);
+      return bucket(pl.c[s.ci]);
+    }).join('');
+    return `2K STATLE — ${r.overall} OVR (best ${analysis.bestRes.overall})\n${squares}\n${SHARE_URL}`;
+  }
+  async function handleShare() {
+    const text = shareText();
+    if (navigator.share) { try { await navigator.share({ text }); } catch (e) { /* cancelled */ } return; }
+    try { await navigator.clipboard.writeText(text); setShareLabel('Copied!'); setTimeout(() => setShareLabel('Share'), 1500); } catch (e) { /* ignore */ }
+  }
+
   if (phase === 'done') {
     const r = result();
     let totalAttr = 0;
@@ -357,6 +404,9 @@ export default function App() {
               <div className="flex items-center" style={{ gap: 8, flexWrap: 'wrap' }}>
                 <button onClick={() => setShowBest(true)} className="select-none btn-ghost" style={{ background: 'transparent', color: C_ACCENT, border: `1px solid ${C_BORDER}`, borderRadius: 12, padding: '12px 16px', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>
                   See best build
+                </button>
+                <button onClick={handleShare} className="select-none btn-ghost" style={{ background: 'transparent', color: C_ACCENT, border: `1px solid ${C_BORDER}`, borderRadius: 12, padding: '12px 16px', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>
+                  {shareLabel}
                 </button>
                 <button onClick={newGame} className="flex items-center gap-2 select-none btn-red" style={{ background: C_RED, color: '#FFFFFF', border: 'none', borderRadius: 12, padding: '12px 18px', fontSize: 15, fontWeight: 800, cursor: 'pointer' }}>
                   <RotateCcw size={16} /> Build again
@@ -453,6 +503,9 @@ export default function App() {
             <span style={{ fontSize: 12, fontWeight: 700, color: '#FFFFFF', background: C_ACCENT, borderRadius: 999, padding: '3px 10px' }}>{filled}/{SLOTS.length} locked</span>
             <button onClick={newGame} className="flex items-center gap-1 select-none btn-ghost" style={{ background: 'transparent', color: C_MUTED, border: `1px solid ${C_BORDER}`, borderRadius: 8, padding: '5px 9px', fontSize: 12, cursor: 'pointer' }}>
               <RotateCcw size={12} /> Reset
+            </button>
+            <button onClick={() => setShowStats(true)} className="select-none btn-ghost" style={{ background: 'transparent', color: C_MUTED, border: `1px solid ${C_BORDER}`, borderRadius: 8, padding: '5px 9px', fontSize: 12, cursor: 'pointer' }}>
+              Stats
             </button>
           </div>
         </div>
@@ -573,6 +626,47 @@ export default function App() {
           {spinning ? 'Spinning…' : pending ? 'Lock your player into a slot' : 'Spin'}
         </button>
       </div>
+
+      {showStats ? (() => {
+        const games = loadGames();
+        const daily = loadDaily();
+        const MODE_LABELS = { normal: 'Normal', hard: 'Hard', legends: 'Legends', daily: 'Daily' };
+        const bestPerMode = Object.keys(MODE_LABELS).map((m) => {
+          const gs = games.filter((g) => g.mode === m);
+          return { m, label: MODE_LABELS[m], best: gs.length ? Math.max(...gs.map((g) => g.overall)) : null };
+        });
+        const avgEff = games.length ? Math.round(games.reduce((a, g) => a + (g.eff || 0), 0) / games.length) : 0;
+        const perfects = games.filter((g) => g.perfect).length;
+        return (
+          <Modal title="Your stats" onClose={() => setShowStats(false)}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8, marginBottom: 14 }}>
+              {[['Games played', games.length], ['Avg efficiency', `${avgEff}%`], ['Perfect games', perfects], ['Daily streak', daily.streak || 0]].map(([label, value]) => (
+                <div key={label} style={{ background: C_SURFACE2, border: `1px solid ${C_BORDER}`, borderRadius: 10, padding: '10px 12px' }}>
+                  <div style={{ fontSize: 20, fontWeight: 800, color: C_ACCENT }}>{value}</div>
+                  <div style={{ fontSize: 10, color: C_MUTED, textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: 2 }}>{label}</div>
+                </div>
+              ))}
+            </div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: C_MUTED, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Best overall by mode</div>
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 14 }}>
+              {bestPerMode.map((b) => (
+                <span key={b.m} style={{ fontSize: 12, color: C_TEXT, border: `1px solid ${C_BORDER}`, borderRadius: 8, padding: '4px 8px' }}>{b.label}: <strong>{b.best == null ? '—' : b.best}</strong></span>
+              ))}
+            </div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: C_MUTED, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Recent games</div>
+            {games.length === 0 ? (
+              <div style={{ fontSize: 12, color: C_MUTED }}>No games yet — finish a build to start tracking.</div>
+            ) : games.slice(0, 10).map((g) => (
+              <div key={g.id} className="flex items-center justify-between" style={{ fontSize: 12, padding: '6px 0', borderBottom: `1px solid ${C_BORDER}`, gap: 8 }}>
+                <span style={{ color: C_MUTED, flex: 1 }}>{new Date(g.dateISO).toLocaleDateString()}</span>
+                <span style={{ textTransform: 'capitalize', color: C_MUTED, flex: 1 }}>{g.mode}{g.daily ? ` #${g.daily}` : ''}</span>
+                <span style={{ flex: 1, textAlign: 'right' }}><strong>{g.overall}</strong> <span style={{ color: C_MUTED }}>vs {g.best}</span></span>
+                <span style={{ color: C_RED, width: 14, textAlign: 'center' }}>{g.perfect ? '✓' : ''}</span>
+              </div>
+            ))}
+          </Modal>
+        );
+      })() : null}
     </div>
   );
 }
