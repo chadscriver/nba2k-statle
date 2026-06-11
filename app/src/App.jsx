@@ -294,42 +294,40 @@ export default function App() {
           Spin a player, then lock him into any open slot — position and frame, intangibles, or his rating in one category. You get two re-rolls a game: one for another player on his team, one for anyone in the league. Ratings stay hidden until you commit, and your overall stays hidden until every slot is filled.
         </p>
 
-        <div style={{ minHeight: 78, marginBottom: 14 }}>
+        <div className="rollzone">
           {(pending || spinning) ? (
-            <div style={{ background: C_SURFACE, border: `1px solid ${C_ACCENT}`, borderRadius: 14, padding: '12px 16px', boxShadow: SHADOW }}>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center" style={{ gap: 12 }}>
-                  {show ? <Headshot p={show} size={52} /> : null}
-                  <div>
-                  <div style={{ fontSize: 11, color: C_MUTED, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{spinning ? <><span className="live-dot" />Spinning…</> : 'You rolled'}</div>
-                  <div key={show ? show.n : 'none'} className="tick" style={{ fontSize: 19, fontWeight: 800 }}>{show ? show.n : '—'}</div>
-                  <div style={{ fontSize: 11, color: C_MUTED, marginTop: 1 }}>{show ? show.tm : '\u00A0'}</div>
-                  </div>
-                </div>
+            <div style={{ height: '100%', background: C_SURFACE, border: `1px solid ${C_ACCENT}`, borderRadius: 14, padding: '12px 16px', boxShadow: SHADOW, display: 'flex', alignItems: 'center', gap: 14 }}>
+              {show ? <Headshot p={show} size={86} /> : null}
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: 11, color: C_MUTED, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{spinning ? <><span className="live-dot" />Spinning…</> : 'You rolled'}</div>
+                <div key={show ? show.n : 'none'} className="tick" style={{ fontSize: 19, fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{show ? show.n : '—'}</div>
+                <div style={{ fontSize: 11, color: C_MUTED, marginTop: 1 }}>{show ? show.tm : '\u00A0'}</div>
+              </div>
+              <div style={{ marginLeft: 'auto', alignSelf: 'stretch', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'space-between', padding: '3px 0', flexShrink: 0 }}>
                 {show ? (
                   <div className="flex items-center gap-2">
                     <span style={{ fontSize: 12, color: C_MUTED, border: `1px solid ${C_BORDER}`, borderRadius: 8, padding: '3px 8px' }}>{show.p}</span>
                     <span style={{ fontSize: 12, color: C_MUTED, border: `1px solid ${C_BORDER}`, borderRadius: 8, padding: '3px 8px' }}>{show.ht}</span>
+                    {show.wt ? <span style={{ fontSize: 12, color: C_MUTED, border: `1px solid ${C_BORDER}`, borderRadius: 8, padding: '3px 8px' }}>{show.wt} lbs</span> : null}
                     <span style={{ fontSize: 12, fontWeight: 700, color: C_ACCENT, border: `1px solid ${C_BORDER}`, borderRadius: 8, padding: '3px 8px' }}>{show.o} OVR</span>
                   </div>
-                ) : null}
+                ) : <span />}
+                {!spinning && pending ? (
+                  <div className="flex items-center" style={{ gap: 8 }}>
+                    <button onClick={() => reroll('team')} disabled={!rerolls.team || sameTeamCount === 0} className="flex items-center gap-1 select-none btn-ghost"
+                      style={{ background: 'transparent', color: (rerolls.team && sameTeamCount > 0) ? C_ACCENT : C_MUTED, border: `1px solid ${(rerolls.team && sameTeamCount > 0) ? C_ACCENT : C_BORDER}`, borderRadius: 8, padding: '5px 10px', fontSize: 12, fontWeight: 600, cursor: (rerolls.team && sameTeamCount > 0) ? 'pointer' : 'not-allowed', opacity: (rerolls.team && sameTeamCount > 0) ? 1 : 0.45 }}>
+                      <RotateCcw size={12} /> Re-roll {pending.tm}
+                    </button>
+                    <button onClick={() => reroll('any')} disabled={!rerolls.any} className="flex items-center gap-1 select-none btn-ghost"
+                      style={{ background: 'transparent', color: rerolls.any ? C_ACCENT : C_MUTED, border: `1px solid ${rerolls.any ? C_ACCENT : C_BORDER}`, borderRadius: 8, padding: '5px 10px', fontSize: 12, fontWeight: 600, cursor: rerolls.any ? 'pointer' : 'not-allowed', opacity: rerolls.any ? 1 : 0.45 }}>
+                      <RotateCcw size={12} /> Re-roll anyone
+                    </button>
+                  </div>
+                ) : <span />}
               </div>
-              {!spinning && pending ? (
-                <div className="flex items-center" style={{ gap: 8, marginTop: 10 }}>
-                  <button onClick={() => reroll('team')} disabled={!rerolls.team || sameTeamCount === 0} className="flex items-center gap-1 select-none btn-ghost"
-                    style={{ background: 'transparent', color: (rerolls.team && sameTeamCount > 0) ? C_ACCENT : C_MUTED, border: `1px solid ${(rerolls.team && sameTeamCount > 0) ? C_ACCENT : C_BORDER}`, borderRadius: 8, padding: '5px 10px', fontSize: 12, fontWeight: 600, cursor: (rerolls.team && sameTeamCount > 0) ? 'pointer' : 'not-allowed', opacity: (rerolls.team && sameTeamCount > 0) ? 1 : 0.45 }}>
-                    <RotateCcw size={12} /> Re-roll {pending.tm}
-                  </button>
-                  <button onClick={() => reroll('any')} disabled={!rerolls.any} className="flex items-center gap-1 select-none btn-ghost"
-                    style={{ background: 'transparent', color: rerolls.any ? C_ACCENT : C_MUTED, border: `1px solid ${rerolls.any ? C_ACCENT : C_BORDER}`, borderRadius: 8, padding: '5px 10px', fontSize: 12, fontWeight: 600, cursor: rerolls.any ? 'pointer' : 'not-allowed', opacity: rerolls.any ? 1 : 0.45 }}>
-                    <RotateCcw size={12} /> Re-roll anyone
-                  </button>
-                  <span style={{ fontSize: 11, color: C_MUTED, marginLeft: 'auto' }}>or pick a slot below</span>
-                </div>
-              ) : null}
             </div>
           ) : (
-            <div className="flex items-center justify-center" style={{ height: 78, color: C_MUTED, fontSize: 13 }}>
+            <div className="flex items-center justify-center" style={{ height: '100%', color: C_MUTED, fontSize: 13 }}>
               Hit spin to roll a player.
             </div>
           )}
@@ -348,45 +346,38 @@ export default function App() {
                   boxShadow: SHADOW,
                   background: C_SURFACE,
                   border: `1px solid ${selectable ? C_ACCENT : C_BORDER}`,
-                  borderRadius: 12, padding: 11, minHeight: 104,
+                  borderRadius: 12, padding: 12, minHeight: 158,
                   cursor: selectable ? 'pointer' : 'default',
                   opacity: pending && pl ? 0.5 : 1,
                   display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
                 }}
               >
-                <div style={{ fontSize: 11, fontWeight: 600, color: C_ACCENT, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{s.label}</div>
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 6 }}>
+                  <div style={{ fontSize: 11, fontWeight: 600, color: C_ACCENT, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{s.label}</div>
+                  {pl ? (
+                    s.kind === 'arch' ? <span style={{ fontSize: 22, fontWeight: 800, lineHeight: 1 }}>{pl.p}</span>
+                      : s.kind === 'int' ? <span style={{ fontSize: 26, fontWeight: 800, lineHeight: 1, color: numColor(pl.ig) }}>{pl.ig}</span>
+                        : <span style={{ fontSize: 26, fontWeight: 800, lineHeight: 1, color: numColor(pl.c[s.ci]) }}>{pl.c[s.ci]}</span>
+                  ) : null}
+                </div>
                 {pl ? (
-                  s.kind === 'arch' ? (
-                    <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <Headshot p={pl} size={30} />
-                        <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
-                          <span style={{ fontSize: 24, fontWeight: 800, lineHeight: 1 }}>{pl.p}</span>
-                          <span style={{ fontSize: 13, color: C_MUTED }}>{pl.ht}</span>
-                        </div>
-                      </div>
+                  <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 6, marginTop: 8 }}>
+                    <div style={{ minWidth: 0 }}>
+                      <Headshot p={pl} size={64} />
                       <div style={{ fontSize: 10, color: C_MUTED, marginTop: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{pl.n}</div>
                     </div>
-                  ) : s.kind === 'int' ? (
-                    <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <Headshot p={pl} size={30} />
-                        <div style={{ fontSize: 28, fontWeight: 800, lineHeight: 1, color: numColor(pl.ig) }}>{pl.ig}</div>
+                    {s.kind === 'arch' ? (
+                      <div style={{ textAlign: 'right', fontSize: 10, color: C_MUTED, lineHeight: 1.7, whiteSpace: 'nowrap' }}>
+                        <div>Height: {pl.ht}</div>
+                        {pl.wt ? <div>Weight: {pl.wt} lbs</div> : null}
+                        {pl.ws ? <div>Wingspan: {pl.ws}</div> : null}
                       </div>
-                      <div style={{ fontSize: 10, color: C_MUTED, marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{pl.n}</div>
-                    </div>
-                  ) : (
-                    <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <Headshot p={pl} size={30} />
-                        <div style={{ fontSize: 28, fontWeight: 800, lineHeight: 1, color: numColor(pl.c[s.ci]) }}>{pl.c[s.ci]}</div>
-                      </div>
-                      <div style={{ fontSize: 10, color: C_MUTED, marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{pl.n}</div>
+                    ) : s.kind === 'cat' ? (
                       <TierPills counts={(pl.b && pl.b[CATS[s.ci].key]) || [0, 0, 0, 0]} />
-                    </div>
-                  )
+                    ) : null}
+                  </div>
                 ) : (
-                  <div style={{ fontSize: 12, fontWeight: 600, color: selectable ? C_ACCENT : C_MUTED }}>{selectable ? 'Lock here' : '—'}</div>
+                  <div style={{ flex: 1, display: 'flex', alignItems: 'center', fontSize: 12, fontWeight: 600, color: selectable ? C_ACCENT : C_MUTED }}>{selectable ? 'Lock here' : '—'}</div>
                 )}
               </div>
             );

@@ -27,6 +27,10 @@ button { font-family: inherit; }
   transform: translateY(-2px);
   box-shadow: 0 6px 14px rgba(10, 27, 61, 0.1), 0 18px 36px -16px rgba(10, 27, 61, 0.22) !important;
 }
+.slot-sel:active {
+  transform: translateY(1px) scale(0.97);
+  box-shadow: 0 1px 2px rgba(10, 27, 61, 0.08) !important;
+}
 
 /* ---- motion ---- */
 @keyframes tickIn { from { opacity: 0.2; transform: translateY(7px); } to { opacity: 1; transform: none; } }
@@ -50,10 +54,14 @@ button { font-family: inherit; }
   animation: pulseDot 0.9s ease-in-out infinite;
 }
 
+/* ---- roll zone (fixed height so the layout never jumps) ---- */
+.rollzone { height: 122px; margin-bottom: 14px; }
+
 /* ---- responsive grids ---- */
 .slot-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 16px; }
 .end-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 @media (max-width: 600px) {
+  .rollzone { height: auto; min-height: 122px; }
   .slot-grid { grid-template-columns: repeat(2, 1fr); }
   .end-grid { grid-template-columns: 1fr; }
 }
