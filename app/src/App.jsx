@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Dice5, RotateCcw } from 'lucide-react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { Dice5, RotateCcw, X } from 'lucide-react';
 import NORMAL_POOL from './pool.json';
 import TEAMS from './teams.json';
 
@@ -39,6 +39,57 @@ const teamLogoSrc = (tm) => { const m = TEAMS[tm]; return m && m.logo ? `${BASE}
 
 const MODES = [{ id: 'normal', label: 'Normal' }, { id: 'hard', label: 'Hard' }, { id: 'legends', label: 'Legends' }];
 
+const CAT_KEYS = ['OUT', 'IN', 'PLY', 'ATH', 'DEF', 'REB'];
+
+function badgePts(pl, cat) {
+  const bb = (pl.b && pl.b[cat]) || [0, 0, 0, 0];
+  return 4 * bb[0] + 3 * bb[1] + 2 * bb[2] + bb[3];
+}
+
+// arch, intp: pool entries; cats: array of 6 pool entries aligned with CAT_KEYS.
+// Returns the unclamped, unrounded build score.
+function scoreArrangement(arch, intp, cats) {
+  const f = FORM[arch.p];
+  let base = f.int + f.ht * arch.hi + f.ig * intp.ig;
+  for (let ci = 0; ci < 6; ci++) {
+    const c = CAT_KEYS[ci], pl = cats[ci], w = f.w[c], a = pl.a[c];
+    for (let i = 0; i < w.length; i++) base += w[i] * a[i];
+    if (f.bw[c] !== undefined) base += f.bw[c] * badgePts(pl, c);
+  }
+  return base;
+}
+
+function permute6(arr, cb) {
+  const a = arr.slice(), n = a.length;
+  const rec = (k) => {
+    if (k === n) { cb(a); return; }
+    for (let i = k; i < n; i++) {
+      [a[k], a[i]] = [a[i], a[k]]; rec(k + 1); [a[k], a[i]] = [a[i], a[k]];
+    }
+  };
+  rec(0);
+}
+
+// players: exactly 8 pool entries. Brute-forces all 8*7*720 = 40,320 assignments.
+function bestArrangement(players) {
+  let best = -Infinity, asg = null;
+  for (let ai = 0; ai < 8; ai++) {
+    for (let ii = 0; ii < 8; ii++) {
+      if (ii === ai) continue;
+      const rest = [];
+      for (let k = 0; k < 8; k++) if (k !== ai && k !== ii) rest.push(k);
+      permute6(rest, (perm) => {
+        const s = scoreArrangement(players[ai], players[ii],
+          [players[perm[0]], players[perm[1]], players[perm[2]],
+           players[perm[3]], players[perm[4]], players[perm[5]]]);
+        if (s > best) { best = s; asg = { arch: ai, int: ii, cats: perm.slice() }; }
+      });
+    }
+  }
+  return { score: best,
+           overall: Math.max(0, Math.min(99, Math.round(best))), asg };
+}
+
 const SLOTS = [
   { id: 'ARCH', kind: 'arch', label: 'Position & Frame' },
   { id: 'OUT', kind: 'cat', ci: 0, label: 'Outside Scoring' },
@@ -76,6 +127,22 @@ function TeamLogo({ tm, size }) {
       onError={(e) => { e.currentTarget.style.display = 'none'; }}
       style={{ width: size, height: size, objectFit: 'contain', flexShrink: 0, verticalAlign: 'middle' }}
     />
+  );
+}
+
+function Modal({ title, onClose, children }) {
+  return (
+    <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(10,27,61,0.55)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: 20, zIndex: 50, overflowY: 'auto' }}>
+      <div onClick={(e) => e.stopPropagation()} style={{ background: C_SURFACE, border: `1px solid ${C_BORDER}`, borderRadius: 16, boxShadow: SHADOW, maxWidth: 520, width: '100%', maxHeight: '80vh', overflowY: 'auto', padding: 20, marginTop: '6vh' }}>
+        <div className="flex items-center justify-between" style={{ marginBottom: 14 }}>
+          <div style={{ fontSize: 16, fontWeight: 800 }}>{title}</div>
+          <button onClick={onClose} aria-label="Close" className="select-none btn-ghost" style={{ background: 'transparent', color: C_MUTED, border: `1px solid ${C_BORDER}`, borderRadius: 8, padding: '4px 8px', cursor: 'pointer', lineHeight: 1 }}>
+            <X size={16} />
+          </button>
+        </div>
+        {children}
+      </div>
+    </div>
   );
 }
 
@@ -138,10 +205,11 @@ export default function App() {
   const [mode, setMode] = useState(() => (typeof localStorage !== 'undefined' && localStorage.getItem('statle.mode')) || 'normal');
   const [pool, setPool] = useState(NORMAL_POOL);
   const [poolLoading, setPoolLoading] = useState(false);
+  const [showBest, setShowBest] = useState(false);
   const iv = useRef(null), to = useRef(null);
 
   function cleanup() { clearInterval(iv.current); clearTimeout(to.current); }
-  function newGame() { cleanup(); setSlots({}); setPending(null); setSpinning(false); setFlash(null); setPhase('play'); setRerolls({ team: true, any: true }); setLastLock(null); setDisp(0); }
+  function newGame() { cleanup(); setSlots({}); setPending(null); setSpinning(false); setFlash(null); setPhase('play'); setRerolls({ team: true, any: true }); setLastLock(null); setDisp(0); setShowBest(false); }
   useEffect(() => { newGame(); return cleanup; }, []);
 
   // Pool loading: normal is bundled; hard/legends lazy-load so the initial
@@ -220,6 +288,26 @@ export default function App() {
     return { bp, bodyAdj, overall: Math.max(0, Math.min(99, Math.round(base))) };
   }
 
+  // On completion: the user's actual score, the optimal arrangement of the same
+  // 8 locked players, efficiency, and whether the build is perfect.
+  const analysis = useMemo(() => {
+    if (phase !== 'done' || !SLOTS.every((s) => slots[s.id])) return null;
+    const players8 = SLOTS.map((s) => slots[s.id]);
+    const userScore = scoreArrangement(slots.ARCH, slots.INT, CAT_KEYS.map((k) => slots[k]));
+    const bestRes = bestArrangement(players8);
+    const a = bestRes.asg;
+    const optimalBySlot = {
+      ARCH: players8[a.arch], INT: players8[a.int],
+      OUT: players8[a.cats[0]], IN: players8[a.cats[1]], PLY: players8[a.cats[2]],
+      ATH: players8[a.cats[3]], DEF: players8[a.cats[4]], REB: players8[a.cats[5]],
+    };
+    return {
+      userScore, bestRes, optimalBySlot,
+      perfect: userScore >= bestRes.score - 1e-6,
+      eff: Math.round(100 * userScore / bestRes.score),
+    };
+  }, [phase, slots]);
+
   useEffect(() => {
     if (phase !== 'done') return;
     const target = result().overall;
@@ -256,12 +344,24 @@ export default function App() {
                     {slots.ARCH && slots.ARCH.wt ? <div>Weight: {slots.ARCH.wt} lbs</div> : null}
                     {slots.ARCH && slots.ARCH.ws ? <div>Wingspan: {slots.ARCH.ws}</div> : null}
                   </div>
+                  {analysis ? (analysis.perfect ? (
+                    <div style={{ fontSize: 13, fontWeight: 800, color: C_RED, marginTop: 6 }}>Perfect build</div>
+                  ) : (
+                    <div style={{ fontSize: 13, color: C_MUTED, marginTop: 6 }}>
+                      Best possible: {analysis.bestRes.overall} — you left <strong>{analysis.bestRes.overall - r.overall}</strong> on the table
+                    </div>
+                  )) : null}
                   <div className="fade-late" style={{ fontSize: 13, fontWeight: 700, color: C_RED, marginTop: 4 }}>{tierFor(r.overall)}</div>
                 </div>
               </div>
-              <button onClick={newGame} className="flex items-center gap-2 select-none btn-red" style={{ background: C_RED, color: '#FFFFFF', border: 'none', borderRadius: 12, padding: '12px 18px', fontSize: 15, fontWeight: 800, cursor: 'pointer' }}>
-                <RotateCcw size={16} /> Build again
-              </button>
+              <div className="flex items-center" style={{ gap: 8, flexWrap: 'wrap' }}>
+                <button onClick={() => setShowBest(true)} className="select-none btn-ghost" style={{ background: 'transparent', color: C_ACCENT, border: `1px solid ${C_BORDER}`, borderRadius: 12, padding: '12px 16px', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>
+                  See best build
+                </button>
+                <button onClick={newGame} className="flex items-center gap-2 select-none btn-red" style={{ background: C_RED, color: '#FFFFFF', border: 'none', borderRadius: 12, padding: '12px 18px', fontSize: 15, fontWeight: 800, cursor: 'pointer' }}>
+                  <RotateCcw size={16} /> Build again
+                </button>
+              </div>
             </div>
             <div className="flex items-center" style={{ gap: 16, marginTop: 12, fontSize: 12, color: C_MUTED }}>
               <span>Position &amp; frame via {slots.ARCH ? slots.ARCH.n : '—'}</span>
@@ -303,6 +403,27 @@ export default function App() {
               </div>
             ) : null}
           </div>
+          {showBest && analysis ? (
+            <Modal title={`Best possible build — ${analysis.bestRes.overall} OVR`} onClose={() => setShowBest(false)}>
+              {SLOTS.map((s) => {
+                const you = slots[s.id], opt = analysis.optimalBySlot[s.id];
+                const same = you.n === opt.n;
+                return (
+                  <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 10px', borderLeft: `3px solid ${same ? 'transparent' : C_RED}`, borderBottom: `1px solid ${C_BORDER}` }}>
+                    <div style={{ width: 116, flexShrink: 0, fontSize: 10, fontWeight: 700, color: C_ACCENT, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{s.label}</div>
+                    {same ? (
+                      <div style={{ flex: 1, fontSize: 13 }}>{you.n} <span style={{ color: C_RED, fontWeight: 800 }}>✓</span></div>
+                    ) : (
+                      <>
+                        <div style={{ flex: 1, minWidth: 0, fontSize: 13, color: C_MUTED, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{you.n}</div>
+                        <div style={{ flex: 1, minWidth: 0, fontSize: 13, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{opt.n}</div>
+                      </>
+                    )}
+                  </div>
+                );
+              })}
+            </Modal>
+          ) : null}
         </div>
       </div>
     );
