@@ -25,6 +25,41 @@ MAX_TEAMS=2 python scraper.py     # quick test
 
 Open `data/nba2k26.csv` in Excel/Sheets directly — no conversion needed.
 
+## Classic teams, headshots, logos & player pools
+
+The current-roster scrape above is one half of the pipeline. The other half adds
+**classic teams**, downloads imagery, and generates the JSON pools the game loads.
+All page fetching/parsing lives in **`twok.py`** (shared by `scraper.py` and the
+classic scraper — one parser, no forks). Pages are cached under `.cache/2kratings/`
+so every scrape is **resumable** and only sleeps politely (1.25s) on live requests.
+
+```bash
+python scripts/scrape_classic.py    # 1. classic teams  -> data/nba2k26_classic.csv
+python scripts/fetch_headshots.py   # 2. player headshots -> app/public/headshots/
+python scripts/fetch_logos.py       # 3. team logos       -> app/public/logos/ + teams.json
+python scripts/build_pools.py       # 4. pools            -> app/src/pool*.json
+```
+
+| Script | What it does | Outputs |
+|---|---|---|
+| `twok.py` | Shared fetch (cached/resumable) + roster/player/logo parsing | — (imported) |
+| `scripts/scrape_classic.py` | Scrapes every 2kratings **Classic Team** (excludes current & all-time). Same column schema as `nba2k26.csv` plus `classic_team, base_team, season, era_tag`; one row per team card (no dedupe across teams) | `data/nba2k26_classic.csv`, `data/classic_teams.json`, `data/badge_categories.json` |
+| `scripts/fetch_headshots.py` | Maps every current **and** historic player to an NBA id (nba_api static list, incl. retired) and pulls `cdn.nba.com` headshots. One image per human (no era in slug), skips existing. Multiple-id names are **not guessed** | `app/public/headshots/*.png`, `data/headshot_ambiguous.csv`, `data/headshot_misses.csv` |
+| `scripts/fetch_logos.py` | Downloads the **era-correct** logo from each team's own page (Sonics, teal Hornets, etc.), rasterizes SVG→PNG via `qlmanage`; CDN fallback for current teams | `app/public/logos/*.png`, `app/src/teams.json` |
+| `scripts/build_pools.py` | Builds the three player pools from the CSVs + headshots on disk. Folds in the weight/wingspan merge (replaces the old `add_body_to_pool.py`). Self-checks every regenerated current player against the shipped `pool.json` and aborts on any field drift | `app/src/pool.json`, `app/src/pool_full.json`, `app/src/pool_legends.json` |
+
+**Pools** (exact entry shape `n, p, tm, o, hi, ht, ig, c, a, b, img, wt, ws`):
+`pool.json` = current top-10-per-team; `pool_full.json` = all current; `pool_legends.json`
+= all classic rows, with `n` era-tagged (`Michael Jordan ('96)`) and `tm` the full
+classic label. `img` is set only when the headshot file actually exists on disk.
+
+`app/src/teams.json` maps every team label used by the pools (current = abbreviation,
+classic = full label) to `{ "logo": "logos/<file>", "season": <season|null> }`.
+
+> Historic note: 2K lists some deep-bench classic players with no ratings (`--`), and a
+> few share a name with other NBA players. Unrated players are skipped; ambiguous names
+> are parked in `headshot_ambiguous.csv` for manual resolution rather than guessed.
+
 ## Why CSV/JSON and not .xlsx
 
 This is a daily git-committed pipeline. CSV diffs cleanly (you can see exactly which

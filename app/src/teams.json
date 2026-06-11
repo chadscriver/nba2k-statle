@@ -1,0 +1,386 @@
+{
+  "1964-65 Los Angeles Lakers": {
+    "logo": "logos/1964-65-los-angeles-lakers.png",
+    "season": "1964-65"
+  },
+  "1970-71 Los Angeles Lakers": {
+    "logo": "logos/1970-71-los-angeles-lakers.png",
+    "season": "1970-71"
+  },
+  "1970-71 Milwaukee Bucks": {
+    "logo": "logos/1970-71-milwaukee-bucks.png",
+    "season": "1970-71"
+  },
+  "1971-72 New York Knicks": {
+    "logo": "logos/1971-72-new-york-knicks.png",
+    "season": "1971-72"
+  },
+  "1976-77 Philadelphia 76ers": {
+    "logo": "logos/1976-77-philadelphia-76ers.png",
+    "season": "1976-77"
+  },
+  "1984-85 Milwaukee Bucks": {
+    "logo": "logos/1984-85-milwaukee-bucks.png",
+    "season": "1984-85"
+  },
+  "1985-86 Atlanta Hawks": {
+    "logo": "logos/1985-86-atlanta-hawks.png",
+    "season": "1985-86"
+  },
+  "1985-86 Boston Celtics": {
+    "logo": "logos/1985-86-boston-celtics.png",
+    "season": "1985-86"
+  },
+  "1985-86 Chicago Bulls": {
+    "logo": "logos/1985-86-chicago-bulls.png",
+    "season": "1985-86"
+  },
+  "1986-87 Los Angeles Lakers": {
+    "logo": "logos/1986-87-los-angeles-lakers.png",
+    "season": "1986-87"
+  },
+  "1988-89 Chicago Bulls": {
+    "logo": "logos/1988-89-chicago-bulls.png",
+    "season": "1988-89"
+  },
+  "1988-89 Detroit Pistons": {
+    "logo": "logos/1988-89-detroit-pistons.png",
+    "season": "1988-89"
+  },
+  "1989-90 Cleveland Cavaliers": {
+    "logo": "logos/1989-90-cleveland-cavaliers.png",
+    "season": "1989-90"
+  },
+  "1990-91 Chicago Bulls": {
+    "logo": "logos/1990-91-chicago-bulls.png",
+    "season": "1990-91"
+  },
+  "1990-91 Golden State Warriors": {
+    "logo": "logos/1990-91-golden-state-warriors.png",
+    "season": "1990-91"
+  },
+  "1990-91 Los Angeles Lakers": {
+    "logo": "logos/1990-91-los-angeles-lakers.png",
+    "season": "1990-91"
+  },
+  "1990-91 Portland Trail Blazers": {
+    "logo": "logos/1990-91-portland-trail-blazers.png",
+    "season": "1990-91"
+  },
+  "1992-93 Charlotte Hornets": {
+    "logo": "logos/1992-93-charlotte-hornets.png",
+    "season": "1992-93"
+  },
+  "1992-93 Chicago Bulls": {
+    "logo": "logos/1992-93-chicago-bulls.png",
+    "season": "1992-93"
+  },
+  "1993-94 Denver Nuggets": {
+    "logo": "logos/1993-94-denver-nuggets.png",
+    "season": "1993-94"
+  },
+  "1993-94 Houston Rockets": {
+    "logo": "logos/1993-94-houston-rockets.png",
+    "season": "1993-94"
+  },
+  "1994-95 New York Knicks": {
+    "logo": "logos/1994-95-new-york-knicks.png",
+    "season": "1994-95"
+  },
+  "1994-95 Orlando Magic": {
+    "logo": "logos/1994-95-orlando-magic.png",
+    "season": "1994-95"
+  },
+  "1995-96 Chicago Bulls": {
+    "logo": "logos/1995-96-chicago-bulls.png",
+    "season": "1995-96"
+  },
+  "1995-96 Seattle Supersonics": {
+    "logo": "logos/1995-96-seattle-supersonics.png",
+    "season": "1995-96"
+  },
+  "1996-97 Miami Heat": {
+    "logo": "logos/1996-97-miami-heat.png",
+    "season": "1996-97"
+  },
+  "1997-98 Chicago Bulls": {
+    "logo": "logos/1997-98-chicago-bulls.png",
+    "season": "1997-98"
+  },
+  "1997-98 Los Angeles Lakers": {
+    "logo": "logos/1997-98-los-angeles-lakers.png",
+    "season": "1997-98"
+  },
+  "1997-98 San Antonio Spurs": {
+    "logo": "logos/1997-98-san-antonio-spurs.png",
+    "season": "1997-98"
+  },
+  "1997-98 Utah Jazz": {
+    "logo": "logos/1997-98-utah-jazz.png",
+    "season": "1997-98"
+  },
+  "1998-99 New York Knicks": {
+    "logo": "logos/1998-99-new-york-knicks.png",
+    "season": "1998-99"
+  },
+  "1999-00 Portland Trail Blazers": {
+    "logo": "logos/1999-00-portland-trail-blazers.png",
+    "season": "1999-00"
+  },
+  "1999-00 Toronto Raptors": {
+    "logo": "logos/1999-00-toronto-raptors.png",
+    "season": "1999-00"
+  },
+  "2000-01 Los Angeles Lakers": {
+    "logo": "logos/2000-01-los-angeles-lakers.png",
+    "season": "2000-01"
+  },
+  "2000-01 Philadelphia 76ers": {
+    "logo": "logos/2000-01-philadelphia-76ers.png",
+    "season": "2000-01"
+  },
+  "2001-02 New Jersey Nets": {
+    "logo": "logos/2001-02-new-jersey-nets.png",
+    "season": "2001-02"
+  },
+  "2001-02 Sacramento Kings": {
+    "logo": "logos/2001-02-sacramento-kings.png",
+    "season": "2001-02"
+  },
+  "2002-03 Dallas Mavericks": {
+    "logo": "logos/2002-03-dallas-mavericks.png",
+    "season": "2002-03"
+  },
+  "2002-03 Phoenix Suns": {
+    "logo": "logos/2002-03-phoenix-suns.png",
+    "season": "2002-03"
+  },
+  "2003-04 Detroit Pistons": {
+    "logo": "logos/2003-04-detroit-pistons.png",
+    "season": "2003-04"
+  },
+  "2003-04 Los Angeles Lakers": {
+    "logo": "logos/2003-04-los-angeles-lakers.png",
+    "season": "2003-04"
+  },
+  "2003-04 Minnesota Timberwolves": {
+    "logo": "logos/2003-04-minnesota-timberwolves.png",
+    "season": "2003-04"
+  },
+  "2004-05 Phoenix Suns": {
+    "logo": "logos/2004-05-phoenix-suns.png",
+    "season": "2004-05"
+  },
+  "2004-05 San Antonio Spurs": {
+    "logo": "logos/2004-05-san-antonio-spurs.png",
+    "season": "2004-05"
+  },
+  "2005-06 Memphis Grizzlies": {
+    "logo": "logos/2005-06-memphis-grizzlies.png",
+    "season": "2005-06"
+  },
+  "2005-06 Miami Heat": {
+    "logo": "logos/2005-06-miami-heat.png",
+    "season": "2005-06"
+  },
+  "2006-07 Cleveland Cavaliers": {
+    "logo": "logos/2006-07-cleveland-cavaliers.png",
+    "season": "2006-07"
+  },
+  "2006-07 Golden State Warriors": {
+    "logo": "logos/2006-07-golden-state-warriors.png",
+    "season": "2006-07"
+  },
+  "2006-07 Washington Wizards": {
+    "logo": "logos/2006-07-washington-wizards.png",
+    "season": "2006-07"
+  },
+  "2007-08 Boston Celtics": {
+    "logo": "logos/2007-08-boston-celtics.png",
+    "season": "2007-08"
+  },
+  "2007-08 Denver Nuggets": {
+    "logo": "logos/2007-08-denver-nuggets.png",
+    "season": "2007-08"
+  },
+  "2007-08 Houston Rockets": {
+    "logo": "logos/2007-08-houston-rockets.png",
+    "season": "2007-08"
+  },
+  "2009-10 Portland Trail Blazers": {
+    "logo": "logos/2009-10-portland-trail-blazers.png",
+    "season": "2009-10"
+  },
+  "2010-11 Chicago Bulls": {
+    "logo": "logos/2010-11-chicago-bulls.png",
+    "season": "2010-11"
+  },
+  "2010-11 Dallas Mavericks": {
+    "logo": "logos/2010-11-dallas-mavericks.png",
+    "season": "2010-11"
+  },
+  "2011-12 New York Knicks": {
+    "logo": "logos/2011-12-new-york-knicks.png",
+    "season": "2011-12"
+  },
+  "2011-12 Oklahoma City Thunder": {
+    "logo": "logos/2011-12-oklahoma-city-thunder.png",
+    "season": "2011-12"
+  },
+  "2012-13 Memphis Grizzlies": {
+    "logo": "logos/2012-13-memphis-grizzlies.png",
+    "season": "2012-13"
+  },
+  "2012-13 Miami Heat": {
+    "logo": "logos/2012-13-miami-heat.png",
+    "season": "2012-13"
+  },
+  "2013-14 Indiana Pacers": {
+    "logo": "logos/2013-14-indiana-pacers.png",
+    "season": "2013-14"
+  },
+  "2013-14 Los Angeles Clippers": {
+    "logo": "logos/2013-14-los-angeles-clippers.png",
+    "season": "2013-14"
+  },
+  "2013-14 San Antonio Spurs": {
+    "logo": "logos/2013-14-san-antonio-spurs.png",
+    "season": "2013-14"
+  },
+  "2015-16 Cleveland Cavaliers": {
+    "logo": "logos/2015-16-cleveland-cavaliers.png",
+    "season": "2015-16"
+  },
+  "2015-16 Golden State Warriors": {
+    "logo": "logos/2015-16-golden-state-warriors.png",
+    "season": "2015-16"
+  },
+  "2016-17 Golden State Warriors": {
+    "logo": "logos/2016-17-golden-state-warriors.png",
+    "season": "2016-17"
+  },
+  "2018-19 Toronto Raptors": {
+    "logo": "logos/2018-19-toronto-raptors.png",
+    "season": "2018-19"
+  },
+  "ATL": {
+    "logo": "logos/atlanta-hawks.png",
+    "season": null
+  },
+  "BKN": {
+    "logo": "logos/brooklyn-nets.png",
+    "season": null
+  },
+  "BOS": {
+    "logo": "logos/boston-celtics.png",
+    "season": null
+  },
+  "CHA": {
+    "logo": "logos/charlotte-hornets.png",
+    "season": null
+  },
+  "CHI": {
+    "logo": "logos/chicago-bulls.png",
+    "season": null
+  },
+  "CLE": {
+    "logo": "logos/cleveland-cavaliers.png",
+    "season": null
+  },
+  "DAL": {
+    "logo": "logos/dallas-mavericks.png",
+    "season": null
+  },
+  "DEN": {
+    "logo": "logos/denver-nuggets.png",
+    "season": null
+  },
+  "DET": {
+    "logo": "logos/detroit-pistons.png",
+    "season": null
+  },
+  "GSW": {
+    "logo": "logos/golden-state-warriors.png",
+    "season": null
+  },
+  "HOU": {
+    "logo": "logos/houston-rockets.png",
+    "season": null
+  },
+  "IND": {
+    "logo": "logos/indiana-pacers.png",
+    "season": null
+  },
+  "LAC": {
+    "logo": "logos/los-angeles-clippers.png",
+    "season": null
+  },
+  "LAL": {
+    "logo": "logos/los-angeles-lakers.png",
+    "season": null
+  },
+  "MEM": {
+    "logo": "logos/memphis-grizzlies.png",
+    "season": null
+  },
+  "MIA": {
+    "logo": "logos/miami-heat.png",
+    "season": null
+  },
+  "MIL": {
+    "logo": "logos/milwaukee-bucks.png",
+    "season": null
+  },
+  "MIN": {
+    "logo": "logos/minnesota-timberwolves.png",
+    "season": null
+  },
+  "NOP": {
+    "logo": "logos/new-orleans-pelicans.png",
+    "season": null
+  },
+  "NYK": {
+    "logo": "logos/new-york-knicks.png",
+    "season": null
+  },
+  "OKC": {
+    "logo": "logos/oklahoma-city-thunder.png",
+    "season": null
+  },
+  "ORL": {
+    "logo": "logos/orlando-magic.png",
+    "season": null
+  },
+  "PHI": {
+    "logo": "logos/philadelphia-76ers.png",
+    "season": null
+  },
+  "PHX": {
+    "logo": "logos/phoenix-suns.png",
+    "season": null
+  },
+  "POR": {
+    "logo": "logos/portland-trail-blazers.png",
+    "season": null
+  },
+  "SAC": {
+    "logo": "logos/sacramento-kings.png",
+    "season": null
+  },
+  "SAS": {
+    "logo": "logos/san-antonio-spurs.png",
+    "season": null
+  },
+  "TOR": {
+    "logo": "logos/toronto-raptors.png",
+    "season": null
+  },
+  "UTA": {
+    "logo": "logos/utah-jazz.png",
+    "season": null
+  },
+  "WAS": {
+    "logo": "logos/washington-wizards.png",
+    "season": null
+  }
+}

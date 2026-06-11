@@ -5,3 +5,4 @@ venv/
 .venv/
 .playwright-mcp/
 .claude/
+.cache/

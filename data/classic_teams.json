@@ -1,0 +1,662 @@
+[
+  {
+    "slug": "2000-01-philadelphia-76ers",
+    "label": "2000-01 Philadelphia 76ers",
+    "base_team": "Philadelphia 76ers",
+    "season": "2000-01",
+    "era_tag": "'01",
+    "franchise_slug": "philadelphia-76ers",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/00-01-Philadelphia-76ers-Classic-2K.svg",
+    "n_players": 20
+  },
+  {
+    "slug": "1976-77-philadelphia-76ers",
+    "label": "1976-77 Philadelphia 76ers",
+    "base_team": "Philadelphia 76ers",
+    "season": "1976-77",
+    "era_tag": "'77",
+    "franchise_slug": "philadelphia-76ers",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/77-Philadelphia-76ers-Classic-2K.svg",
+    "n_players": 14
+  },
+  {
+    "slug": "1970-71-milwaukee-bucks",
+    "label": "1970-71 Milwaukee Bucks",
+    "base_team": "Milwaukee Bucks",
+    "season": "1970-71",
+    "era_tag": "'71",
+    "franchise_slug": "milwaukee-bucks",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/68-93-Milwaukee-Bucks-Classic-2K.svg",
+    "n_players": 14
+  },
+  {
+    "slug": "1984-85-milwaukee-bucks",
+    "label": "1984-85 Milwaukee Bucks",
+    "base_team": "Milwaukee Bucks",
+    "season": "1984-85",
+    "era_tag": "'85",
+    "franchise_slug": "milwaukee-bucks",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/68-93-Milwaukee-Bucks-Classic-2K.svg",
+    "n_players": 18
+  },
+  {
+    "slug": "1985-86-chicago-bulls",
+    "label": "1985-86 Chicago Bulls",
+    "base_team": "Chicago Bulls",
+    "season": "1985-86",
+    "era_tag": "'86",
+    "franchise_slug": "chicago-bulls",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/Chicago-Bulls-Current-Logo.svg",
+    "n_players": 17
+  },
+  {
+    "slug": "1992-93-chicago-bulls",
+    "label": "1992-93 Chicago Bulls",
+    "base_team": "Chicago Bulls",
+    "season": "1992-93",
+    "era_tag": "'93",
+    "franchise_slug": "chicago-bulls",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/Chicago-Bulls-Current-Logo.svg",
+    "n_players": 17
+  },
+  {
+    "slug": "1988-89-chicago-bulls",
+    "label": "1988-89 Chicago Bulls",
+    "base_team": "Chicago Bulls",
+    "season": "1988-89",
+    "era_tag": "'89",
+    "franchise_slug": "chicago-bulls",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/Chicago-Bulls-Current-Logo.svg",
+    "n_players": 16
+  },
+  {
+    "slug": "1995-96-chicago-bulls",
+    "label": "1995-96 Chicago Bulls",
+    "base_team": "Chicago Bulls",
+    "season": "1995-96",
+    "era_tag": "'96",
+    "franchise_slug": "chicago-bulls",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/Chicago-Bulls-Current-Logo.svg",
+    "n_players": 15
+  },
+  {
+    "slug": "2010-11-chicago-bulls",
+    "label": "2010-11 Chicago Bulls",
+    "base_team": "Chicago Bulls",
+    "season": "2010-11",
+    "era_tag": "'11",
+    "franchise_slug": "chicago-bulls",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/Chicago-Bulls-Current-Logo.svg",
+    "n_players": 16
+  },
+  {
+    "slug": "1997-98-chicago-bulls",
+    "label": "1997-98 Chicago Bulls",
+    "base_team": "Chicago Bulls",
+    "season": "1997-98",
+    "era_tag": "'98",
+    "franchise_slug": "chicago-bulls",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/Chicago-Bulls-Current-Logo.svg",
+    "n_players": 17
+  },
+  {
+    "slug": "1990-91-chicago-bulls",
+    "label": "1990-91 Chicago Bulls",
+    "base_team": "Chicago Bulls",
+    "season": "1990-91",
+    "era_tag": "'91",
+    "franchise_slug": "chicago-bulls",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/Chicago-Bulls-Current-Logo.svg",
+    "n_players": 12
+  },
+  {
+    "slug": "1989-90-cleveland-cavaliers",
+    "label": "1989-90 Cleveland Cavaliers",
+    "base_team": "Cleveland Cavaliers",
+    "season": "1989-90",
+    "era_tag": "'90",
+    "franchise_slug": "cleveland-cavaliers",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/83-93-Cleveland-Cavaliers-Classic-2K.svg",
+    "n_players": 17
+  },
+  {
+    "slug": "2015-16-cleveland-cavaliers",
+    "label": "2015-16 Cleveland Cavaliers",
+    "base_team": "Cleveland Cavaliers",
+    "season": "2015-16",
+    "era_tag": "'16",
+    "franchise_slug": "cleveland-cavaliers",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/Cleveland-Cavaliers-Classic-2K.svg",
+    "n_players": 17
+  },
+  {
+    "slug": "2006-07-cleveland-cavaliers",
+    "label": "2006-07 Cleveland Cavaliers",
+    "base_team": "Cleveland Cavaliers",
+    "season": "2006-07",
+    "era_tag": "'07",
+    "franchise_slug": "cleveland-cavaliers",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/03-09-Cleveland-Cavaliers-Classic-2K.svg",
+    "n_players": 15
+  },
+  {
+    "slug": "2007-08-boston-celtics",
+    "label": "2007-08 Boston Celtics",
+    "base_team": "Boston Celtics",
+    "season": "2007-08",
+    "era_tag": "'08",
+    "franchise_slug": "boston-celtics",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/Boston-Celtics-Classic-2K.svg",
+    "n_players": 15
+  },
+  {
+    "slug": "1985-86-boston-celtics",
+    "label": "1985-86 Boston Celtics",
+    "base_team": "Boston Celtics",
+    "season": "1985-86",
+    "era_tag": "'86",
+    "franchise_slug": "boston-celtics",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/Boston-Celtics-Classic-2K.svg",
+    "n_players": 13
+  },
+  {
+    "slug": "2013-14-los-angeles-clippers",
+    "label": "2013-14 Los Angeles Clippers",
+    "base_team": "Los Angeles Clippers",
+    "season": "2013-14",
+    "era_tag": "'14",
+    "franchise_slug": "los-angeles-clippers",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/13-14-Los-Angeles-Clippers-Classic-2K.svg",
+    "n_players": 20
+  },
+  {
+    "slug": "2005-06-memphis-grizzlies",
+    "label": "2005-06 Memphis Grizzlies",
+    "base_team": "Memphis Grizzlies",
+    "season": "2005-06",
+    "era_tag": "'06",
+    "franchise_slug": "memphis-grizzlies",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/04-18-Memphis-Grizzlies-Classic-2K.svg",
+    "n_players": 16
+  },
+  {
+    "slug": "2012-13-memphis-grizzlies",
+    "label": "2012-13 Memphis Grizzlies",
+    "base_team": "Memphis Grizzlies",
+    "season": "2012-13",
+    "era_tag": "'13",
+    "franchise_slug": "memphis-grizzlies",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/04-18-Memphis-Grizzlies-Classic-2K.svg",
+    "n_players": 20
+  },
+  {
+    "slug": "1985-86-atlanta-hawks",
+    "label": "1985-86 Atlanta Hawks",
+    "base_team": "Atlanta Hawks",
+    "season": "1985-86",
+    "era_tag": "'86",
+    "franchise_slug": "atlanta-hawks",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/72-95-Atlanta-Hawks-Classic-2K.svg",
+    "n_players": 16
+  },
+  {
+    "slug": "2005-06-miami-heat",
+    "label": "2005-06 Miami Heat",
+    "base_team": "Miami Heat",
+    "season": "2005-06",
+    "era_tag": "'06",
+    "franchise_slug": "miami-heat",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/Miami-Heat-Current-Logo.svg",
+    "n_players": 17
+  },
+  {
+    "slug": "1996-97-miami-heat",
+    "label": "1996-97 Miami Heat",
+    "base_team": "Miami Heat",
+    "season": "1996-97",
+    "era_tag": "'97",
+    "franchise_slug": "miami-heat",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/Miami-Heat-Classic-Logo.svg",
+    "n_players": 19
+  },
+  {
+    "slug": "2012-13-miami-heat",
+    "label": "2012-13 Miami Heat",
+    "base_team": "Miami Heat",
+    "season": "2012-13",
+    "era_tag": "'13",
+    "franchise_slug": "miami-heat",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/Miami-Heat-Current-Logo.svg",
+    "n_players": 18
+  },
+  {
+    "slug": "1992-93-charlotte-hornets",
+    "label": "1992-93 Charlotte Hornets",
+    "base_team": "Charlotte Hornets",
+    "season": "1992-93",
+    "era_tag": "'93",
+    "franchise_slug": "charlotte-hornets",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/92-93-Charlotte-Hornets-Classic-2K.svg",
+    "n_players": 15
+  },
+  {
+    "slug": "1997-98-utah-jazz",
+    "label": "1997-98 Utah Jazz",
+    "base_team": "Utah Jazz",
+    "season": "1997-98",
+    "era_tag": "'98",
+    "franchise_slug": "utah-jazz",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/96-04-Utah-Jazz-Classic-2K.svg",
+    "n_players": 13
+  },
+  {
+    "slug": "2001-02-sacramento-kings",
+    "label": "2001-02 Sacramento Kings",
+    "base_team": "Sacramento Kings",
+    "season": "2001-02",
+    "era_tag": "'02",
+    "franchise_slug": "sacramento-kings",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/Sacramento-Kings-Classic-2K.svg",
+    "n_players": 14
+  },
+  {
+    "slug": "1971-72-new-york-knicks",
+    "label": "1971-72 New York Knicks",
+    "base_team": "New York Knicks",
+    "season": "1971-72",
+    "era_tag": "'72",
+    "franchise_slug": "new-york-knicks",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/New-York-Knicks-Classic-2K.svg",
+    "n_players": 17
+  },
+  {
+    "slug": "2011-12-new-york-knicks",
+    "label": "2011-12 New York Knicks",
+    "base_team": "New York Knicks",
+    "season": "2011-12",
+    "era_tag": "'12",
+    "franchise_slug": "new-york-knicks",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/New-York-Knicks-Classic-2K.svg",
+    "n_players": 17
+  },
+  {
+    "slug": "1994-95-new-york-knicks",
+    "label": "1994-95 New York Knicks",
+    "base_team": "New York Knicks",
+    "season": "1994-95",
+    "era_tag": "'95",
+    "franchise_slug": "new-york-knicks",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/New-York-Knicks-Classic-2K.svg",
+    "n_players": 16
+  },
+  {
+    "slug": "1998-99-new-york-knicks",
+    "label": "1998-99 New York Knicks",
+    "base_team": "New York Knicks",
+    "season": "1998-99",
+    "era_tag": "'99",
+    "franchise_slug": "new-york-knicks",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/New-York-Knicks-Classic-2K.svg",
+    "n_players": 14
+  },
+  {
+    "slug": "1990-91-los-angeles-lakers",
+    "label": "1990-91 Los Angeles Lakers",
+    "base_team": "Los Angeles Lakers",
+    "season": "1990-91",
+    "era_tag": "'91",
+    "franchise_slug": "los-angeles-lakers",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/76-01-Los-Angeles-Lakers-Classic-2K.svg",
+    "n_players": 13
+  },
+  {
+    "slug": "2003-04-los-angeles-lakers",
+    "label": "2003-04 Los Angeles Lakers",
+    "base_team": "Los Angeles Lakers",
+    "season": "2003-04",
+    "era_tag": "'04",
+    "franchise_slug": "los-angeles-lakers",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/01-02-Los-Angeles-Lakers-Classic-2K.svg",
+    "n_players": 17
+  },
+  {
+    "slug": "1964-65-los-angeles-lakers",
+    "label": "1964-65 Los Angeles Lakers",
+    "base_team": "Los Angeles Lakers",
+    "season": "1964-65",
+    "era_tag": "'65",
+    "franchise_slug": "los-angeles-lakers",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/76-01-Los-Angeles-Lakers-Classic-2K.svg",
+    "n_players": 13
+  },
+  {
+    "slug": "1970-71-los-angeles-lakers",
+    "label": "1970-71 Los Angeles Lakers",
+    "base_team": "Los Angeles Lakers",
+    "season": "1970-71",
+    "era_tag": "'71",
+    "franchise_slug": "los-angeles-lakers",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/76-01-Los-Angeles-Lakers-Classic-2K.svg",
+    "n_players": 13
+  },
+  {
+    "slug": "2000-01-los-angeles-lakers",
+    "label": "2000-01 Los Angeles Lakers",
+    "base_team": "Los Angeles Lakers",
+    "season": "2000-01",
+    "era_tag": "'01",
+    "franchise_slug": "los-angeles-lakers",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/76-01-Los-Angeles-Lakers-Classic-2K.svg",
+    "n_players": 15
+  },
+  {
+    "slug": "1986-87-los-angeles-lakers",
+    "label": "1986-87 Los Angeles Lakers",
+    "base_team": "Los Angeles Lakers",
+    "season": "1986-87",
+    "era_tag": "'87",
+    "franchise_slug": "los-angeles-lakers",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/76-01-Los-Angeles-Lakers-Classic-2K.svg",
+    "n_players": 13
+  },
+  {
+    "slug": "1997-98-los-angeles-lakers",
+    "label": "1997-98 Los Angeles Lakers",
+    "base_team": "Los Angeles Lakers",
+    "season": "1997-98",
+    "era_tag": "'98",
+    "franchise_slug": "los-angeles-lakers",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/76-01-Los-Angeles-Lakers-Classic-2K.svg",
+    "n_players": 13
+  },
+  {
+    "slug": "1994-95-orlando-magic",
+    "label": "1994-95 Orlando Magic",
+    "base_team": "Orlando Magic",
+    "season": "1994-95",
+    "era_tag": "'95",
+    "franchise_slug": "orlando-magic",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/94-95-Orlando-Magic-Classic-2K.svg",
+    "n_players": 15
+  },
+  {
+    "slug": "2002-03-dallas-mavericks",
+    "label": "2002-03 Dallas Mavericks",
+    "base_team": "Dallas Mavericks",
+    "season": "2002-03",
+    "era_tag": "'03",
+    "franchise_slug": "dallas-mavericks",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/Dallas-Mavericks-Current-Logo.svg",
+    "n_players": 17
+  },
+  {
+    "slug": "2010-11-dallas-mavericks",
+    "label": "2010-11 Dallas Mavericks",
+    "base_team": "Dallas Mavericks",
+    "season": "2010-11",
+    "era_tag": "'11",
+    "franchise_slug": "dallas-mavericks",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/Dallas-Mavericks-Current-Logo.svg",
+    "n_players": 18
+  },
+  {
+    "slug": "2001-02-new-jersey-nets",
+    "label": "2001-02 New Jersey Nets",
+    "base_team": "New Jersey Nets",
+    "season": "2001-02",
+    "era_tag": "'02",
+    "franchise_slug": "new-jersey-nets",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/New-Jersey-Nets-Classic-2K.svg",
+    "n_players": 16
+  },
+  {
+    "slug": "2007-08-denver-nuggets",
+    "label": "2007-08 Denver Nuggets",
+    "base_team": "Denver Nuggets",
+    "season": "2007-08",
+    "era_tag": "'08",
+    "franchise_slug": "denver-nuggets",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/03-08-Denver-Nuggets-Classic-2K.svg",
+    "n_players": 16
+  },
+  {
+    "slug": "1993-94-denver-nuggets",
+    "label": "1993-94 Denver Nuggets",
+    "base_team": "Denver Nuggets",
+    "season": "1993-94",
+    "era_tag": "'94",
+    "franchise_slug": "denver-nuggets",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/93-03-Denver-Nuggets-Classic-2K.svg",
+    "n_players": 17
+  },
+  {
+    "slug": "2013-14-indiana-pacers",
+    "label": "2013-14 Indiana Pacers",
+    "base_team": "Indiana Pacers",
+    "season": "2013-14",
+    "era_tag": "'14",
+    "franchise_slug": "indiana-pacers",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/13-14-Indiana-Pacers-Classic-2K.svg",
+    "n_players": 17
+  },
+  {
+    "slug": "1988-89-detroit-pistons",
+    "label": "1988-89 Detroit Pistons",
+    "base_team": "Detroit Pistons",
+    "season": "1988-89",
+    "era_tag": "'89",
+    "franchise_slug": "detroit-pistons",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/79-96-Detroit-Pistons-Classic-2K.svg",
+    "n_players": 17
+  },
+  {
+    "slug": "2003-04-detroit-pistons",
+    "label": "2003-04 Detroit Pistons",
+    "base_team": "Detroit Pistons",
+    "season": "2003-04",
+    "era_tag": "'04",
+    "franchise_slug": "detroit-pistons",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/01-05-Detroit-Pistons-Classic-2K.svg",
+    "n_players": 17
+  },
+  {
+    "slug": "1999-00-toronto-raptors",
+    "label": "1999-00 Toronto Raptors",
+    "base_team": "Toronto Raptors",
+    "season": "1999-00",
+    "era_tag": "'00",
+    "franchise_slug": "toronto-raptors",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/Toronto-Raptors-Classic-2K.svg",
+    "n_players": 16
+  },
+  {
+    "slug": "2018-19-toronto-raptors",
+    "label": "2018-19 Toronto Raptors",
+    "base_team": "Toronto Raptors",
+    "season": "2018-19",
+    "era_tag": "'19",
+    "franchise_slug": "toronto-raptors",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/Toronto-Raptors-Current-Logo.svg",
+    "n_players": 19
+  },
+  {
+    "slug": "1993-94-houston-rockets",
+    "label": "1993-94 Houston Rockets",
+    "base_team": "Houston Rockets",
+    "season": "1993-94",
+    "era_tag": "'94",
+    "franchise_slug": "houston-rockets",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/72-95-Houston-Rockets-Classic-2K.svg",
+    "n_players": 15
+  },
+  {
+    "slug": "2007-08-houston-rockets",
+    "label": "2007-08 Houston Rockets",
+    "base_team": "Houston Rockets",
+    "season": "2007-08",
+    "era_tag": "'08",
+    "franchise_slug": "houston-rockets",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/07-08-Houston-Rockets-Classic-2K-1.svg",
+    "n_players": 20
+  },
+  {
+    "slug": "2013-14-san-antonio-spurs",
+    "label": "2013-14 San Antonio Spurs",
+    "base_team": "San Antonio Spurs",
+    "season": "2013-14",
+    "era_tag": "'14",
+    "franchise_slug": "san-antonio-spurs",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/02-San-Antonio-Spurs-Classic-2K.svg",
+    "n_players": 19
+  },
+  {
+    "slug": "1997-98-san-antonio-spurs",
+    "label": "1997-98 San Antonio Spurs",
+    "base_team": "San Antonio Spurs",
+    "season": "1997-98",
+    "era_tag": "'98",
+    "franchise_slug": "san-antonio-spurs",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/89-02-San-Antonio-Spurs-Classic-2K.svg",
+    "n_players": 15
+  },
+  {
+    "slug": "2004-05-san-antonio-spurs",
+    "label": "2004-05 San Antonio Spurs",
+    "base_team": "San Antonio Spurs",
+    "season": "2004-05",
+    "era_tag": "'05",
+    "franchise_slug": "san-antonio-spurs",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/02-San-Antonio-Spurs-Classic-2K.svg",
+    "n_players": 17
+  },
+  {
+    "slug": "2002-03-phoenix-suns",
+    "label": "2002-03 Phoenix Suns",
+    "base_team": "Phoenix Suns",
+    "season": "2002-03",
+    "era_tag": "'03",
+    "franchise_slug": "phoenix-suns",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/Phoenix-Suns-Classic-2K.svg",
+    "n_players": 14
+  },
+  {
+    "slug": "2004-05-phoenix-suns",
+    "label": "2004-05 Phoenix Suns",
+    "base_team": "Phoenix Suns",
+    "season": "2004-05",
+    "era_tag": "'05",
+    "franchise_slug": "phoenix-suns",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/Phoenix-Suns-Classic-2K.svg",
+    "n_players": 18
+  },
+  {
+    "slug": "1995-96-seattle-supersonics",
+    "label": "1995-96 Seattle Supersonics",
+    "base_team": "Seattle Supersonics",
+    "season": "1995-96",
+    "era_tag": "'96",
+    "franchise_slug": "seattle-supersonics",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/Seattle-Supersonics-Classic-2K.svg",
+    "n_players": 13
+  },
+  {
+    "slug": "2011-12-oklahoma-city-thunder",
+    "label": "2011-12 Oklahoma City Thunder",
+    "base_team": "Oklahoma City Thunder",
+    "season": "2011-12",
+    "era_tag": "'12",
+    "franchise_slug": "oklahoma-city-thunder",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/Oklahoma-City-Thunder-Current-Logo.svg",
+    "n_players": 16
+  },
+  {
+    "slug": "2003-04-minnesota-timberwolves",
+    "label": "2003-04 Minnesota Timberwolves",
+    "base_team": "Minnesota Timberwolves",
+    "season": "2003-04",
+    "era_tag": "'04",
+    "franchise_slug": "minnesota-timberwolves",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/03-04-Minnesota-Timberwolves-Classic-2K.svg",
+    "n_players": 17
+  },
+  {
+    "slug": "1990-91-portland-trail-blazers",
+    "label": "1990-91 Portland Trail Blazers",
+    "base_team": "Portland Trail Blazers",
+    "season": "1990-91",
+    "era_tag": "'91",
+    "franchise_slug": "portland-trail-blazers",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/90-02-Portland-Trailblazers-Classic-2K.svg",
+    "n_players": 13
+  },
+  {
+    "slug": "2009-10-portland-trail-blazers",
+    "label": "2009-10 Portland Trail Blazers",
+    "base_team": "Portland Trail Blazers",
+    "season": "2009-10",
+    "era_tag": "'10",
+    "franchise_slug": "portland-trail-blazers",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/04-Portland-Trailblazers-Classic-2K.svg",
+    "n_players": 20
+  },
+  {
+    "slug": "1999-00-portland-trail-blazers",
+    "label": "1999-00 Portland Trail Blazers",
+    "base_team": "Portland Trail Blazers",
+    "season": "1999-00",
+    "era_tag": "'00",
+    "franchise_slug": "portland-trail-blazers",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/90-02-Portland-Trailblazers-Classic-2K-1.svg",
+    "n_players": 14
+  },
+  {
+    "slug": "1990-91-golden-state-warriors",
+    "label": "1990-91 Golden State Warriors",
+    "base_team": "Golden State Warriors",
+    "season": "1990-91",
+    "era_tag": "'91",
+    "franchise_slug": "golden-state-warriors",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/88-97-Golden-State-Warriors-Classic-2K.svg",
+    "n_players": 18
+  },
+  {
+    "slug": "2016-17-golden-state-warriors",
+    "label": "2016-17 Golden State Warriors",
+    "base_team": "Golden State Warriors",
+    "season": "2016-17",
+    "era_tag": "'17",
+    "franchise_slug": "golden-state-warriors",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/Golden-State-Warriors-Logo.svg",
+    "n_players": 15
+  },
+  {
+    "slug": "2006-07-golden-state-warriors",
+    "label": "2006-07 Golden State Warriors",
+    "base_team": "Golden State Warriors",
+    "season": "2006-07",
+    "era_tag": "'07",
+    "franchise_slug": "golden-state-warriors",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/97-10-Golden-State-Warriors-Classic-2K.svg",
+    "n_players": 19
+  },
+  {
+    "slug": "2015-16-golden-state-warriors",
+    "label": "2015-16 Golden State Warriors",
+    "base_team": "Golden State Warriors",
+    "season": "2015-16",
+    "era_tag": "'16",
+    "franchise_slug": "golden-state-warriors",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/Golden-State-Warriors-Logo.svg",
+    "n_players": 16
+  },
+  {
+    "slug": "2006-07-washington-wizards",
+    "label": "2006-07 Washington Wizards",
+    "base_team": "Washington Wizards",
+    "season": "2006-07",
+    "era_tag": "'07",
+    "franchise_slug": "washington-wizards",
+    "logo_url": "https://www.2kratings.com/wp-content/uploads/Washington-Wizards-Classic-2K.svg",
+    "n_players": 16
+  }
+]
