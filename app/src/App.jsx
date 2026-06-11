@@ -98,7 +98,7 @@ function TierPills({ counts }) {
   const items = counts.map((n, i) => ({ n, i })).filter((x) => x.n > 0);
   if (items.length === 0) return <div style={{ fontSize: 9, color: C_MUTED, marginTop: 4 }}>no badges</div>;
   return (
-    <div style={{ display: 'flex', gap: 4, marginTop: 4 }}>
+    <div style={{ display: 'flex', gap: 4, marginTop: 4, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
       {items.map((x) => (
         <span key={x.i} title={TIERS[x.i]} style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 15, height: 20 }}>
           <img src={TIER_IMG[x.i]} alt={TIERS[x.i]} onError={(e) => { e.currentTarget.style.display = 'none'; }} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain' }} />
@@ -212,8 +212,10 @@ export default function App() {
                 </div>
                 <div>
                   <div style={{ fontSize: 20, fontWeight: 800 }}>{POS_NAME[r.bp]}</div>
-                  <div style={{ fontSize: 13, color: C_MUTED, marginTop: 2 }}>
-                    {slots.ARCH ? slots.ARCH.ht : '—'} frame{r.bodyAdj ? ` (${r.bodyAdj > 0 ? '+' : ''}${r.bodyAdj.toFixed(1)} fit)` : ''}
+                  <div style={{ fontSize: 12, color: C_MUTED, marginTop: 3, lineHeight: 1.6 }}>
+                    <div>Height: {slots.ARCH ? slots.ARCH.ht : '—'}</div>
+                    {slots.ARCH && slots.ARCH.wt ? <div>Weight: {slots.ARCH.wt} lbs</div> : null}
+                    {slots.ARCH && slots.ARCH.ws ? <div>Wingspan: {slots.ARCH.ws}</div> : null}
                   </div>
                   <div className="fade-late" style={{ fontSize: 13, fontWeight: 700, color: C_RED, marginTop: 4 }}>{tierFor(r.overall)}</div>
                 </div>
@@ -346,7 +348,7 @@ export default function App() {
                   boxShadow: SHADOW,
                   background: C_SURFACE,
                   border: `1px solid ${selectable ? C_ACCENT : C_BORDER}`,
-                  borderRadius: 12, padding: 12, minHeight: 158,
+                  borderRadius: 12, padding: 12, minHeight: 172,
                   cursor: selectable ? 'pointer' : 'default',
                   opacity: pending && pl ? 0.5 : 1,
                   display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
@@ -363,21 +365,21 @@ export default function App() {
                 {pl ? (
                   <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 6, marginTop: 8 }}>
                     <div style={{ minWidth: 0 }}>
-                      <Headshot p={pl} size={64} />
+                      <Headshot p={pl} size={88} />
                       <div style={{ fontSize: 10, color: C_MUTED, marginTop: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{pl.n}</div>
                     </div>
                     {s.kind === 'arch' ? (
                       <div style={{ textAlign: 'right', fontSize: 10, color: C_MUTED, lineHeight: 1.7, whiteSpace: 'nowrap' }}>
-                        <div>Height: {pl.ht}</div>
-                        {pl.wt ? <div>Weight: {pl.wt} lbs</div> : null}
-                        {pl.ws ? <div>Wingspan: {pl.ws}</div> : null}
+                        <div>HT {pl.ht}</div>
+                        {pl.wt ? <div>WT {pl.wt} lbs</div> : null}
+                        {pl.ws ? <div>WS {pl.ws}</div> : null}
                       </div>
                     ) : s.kind === 'cat' ? (
                       <TierPills counts={(pl.b && pl.b[CATS[s.ci].key]) || [0, 0, 0, 0]} />
                     ) : null}
                   </div>
                 ) : (
-                  <div style={{ flex: 1, display: 'flex', alignItems: 'center', fontSize: 12, fontWeight: 600, color: selectable ? C_ACCENT : C_MUTED }}>{selectable ? 'Lock here' : '—'}</div>
+                  <div style={{ flex: 1, display: 'flex', alignItems: 'center', fontSize: 12, fontWeight: 600, color: C_MUTED }}>—</div>
                 )}
               </div>
             );
