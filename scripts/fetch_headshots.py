@@ -25,6 +25,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import re
 import sys
 import time
@@ -43,6 +44,11 @@ MISS_CSV = ROOT / "data" / "headshot_misses.csv"
 CDN_URL = "https://cdn.nba.com/headshots/nba/latest/260x190/{id}.png"
 REQUEST_DELAY = 0.25
 UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) nba2k-statle/1.0"
+
+# The NBA CDN serves one byte-identical gray placeholder silhouette (HTTP 200,
+# image/png) for player IDs with no digitized photo. Never save it. This md5 is
+# the placeholder cluster hash reported by scripts/prune_silhouettes.py.
+PLACEHOLDER_MD5 = "7475ba9619305909d7998dd9dba02481"
 
 OVERRIDES: dict[str, int] = {
     "Alexandre Sarr": 1642259,  # listed as "Alex Sarr" in the static roster
@@ -105,6 +111,54 @@ def alias_id(name, active_idx, all_idx):
     return pick_active(cands)["id"] if cands else None
 
 
+def team_nick(team):
+    """Last word of a team name as a normalized key ('Detroit Pistons' -> pistons)."""
+    toks = normalize(team).split()
+    return toks[-1] if toks else ""
+
+
+def fetch_live_rows():
+    """Current-season player index, for recovering current misses (2025-26 rookies,
+    two-way players, and names nba_api lists differently). Primary: stats.nba.com
+    commonallplayers; fallback: the NBA CDN playerIndex JSON that nba.com/players
+    loads. Returns (person_id, full_name, team_name) rows."""
+    try:
+        from nba_api.stats.endpoints import commonallplayers
+        d = commonallplayers.CommonAllPlayers(is_only_current_season=1,
+                                              season="2025-26", timeout=30).get_normalized_dict()
+        return [(p["PERSON_ID"], p.get("DISPLAY_FIRST_LAST") or "", p.get("TEAM_NAME") or "")
+                for p in d["CommonAllPlayers"]]
+    except Exception as e:  # stats.nba.com blocked / unreachable
+        print(f"  live index via stats.nba.com failed ({e}); using NBA CDN playerIndex")
+    try:
+        url = "https://cdn.nba.com/static/json/staticData/playerIndex.json"
+        rs = requests.get(url, headers={"User-Agent": UA, "Referer": "https://www.nba.com/"},
+                          timeout=30).json()["resultSets"][0]
+        h = {c: i for i, c in enumerate(rs["headers"])}
+        return [(row[h["PERSON_ID"]],
+                 f'{row[h["PLAYER_FIRST_NAME"]]} {row[h["PLAYER_LAST_NAME"]]}'.strip(),
+                 row[h["TEAM_NAME"]] or "")
+                for row in rs["rowSet"]]
+    except Exception as e:
+        print(f"  NBA CDN playerIndex also failed ({e}); skipping live recovery")
+        return []
+
+
+def build_live_lookup():
+    """Two lookups over the live index: normalized full name -> [ids], and
+    (normalized last name, team nickname) -> [ids]."""
+    full, lastteam = {}, {}
+    for pid, name, teamname in fetch_live_rows():
+        nm = normalize(name)
+        if not nm:
+            continue
+        full.setdefault(nm, []).append(pid)
+        toks, nick = nm.split(), team_nick(teamname)
+        if toks and nick:
+            lastteam.setdefault((toks[-1], nick), []).append(pid)
+    return full, lastteam
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--dry-run", action="store_true",
@@ -125,6 +179,7 @@ def main() -> int:
     resolved: dict[str, tuple[int, str, str]] = {}
     ambiguous: dict[str, dict] = {}
     no_match: dict[str, dict] = {}
+    cur_unmatched: list[dict] = []  # current rows to retry against the live index
 
     # --- current players: prefer the active record (existing behavior) ---
     for r in current:
@@ -145,6 +200,32 @@ def main() -> int:
         else:
             no_match[name] = {"name": name, "slug": slugify(name),
                               "nba_id": "", "source": "current", "reason": "no_nba_match"}
+            cur_unmatched.append(r)
+
+    # --- recover current misses via the live NBA player index (rookies, two-way
+    #     players, and names the static list spells differently) ---
+    if cur_unmatched:
+        live_full, live_lastteam = build_live_lookup()
+        recovered = 0
+        for r in cur_unmatched:
+            name = r["name"]
+            if name in resolved:
+                continue
+            nm = normalize(name)
+            pid = None
+            fc = live_full.get(nm)
+            if fc and len(set(fc)) == 1:  # unique full-name match
+                pid = fc[0]
+            else:                          # else last name + team, only if unique
+                toks = nm.split()
+                lt = live_lastteam.get((toks[-1], team_nick(r.get("team", "")))) if toks else None
+                if lt and len(set(lt)) == 1:
+                    pid = lt[0]
+            if pid is not None:
+                resolved[name] = (pid, slugify(name), "current")
+                no_match.pop(name, None)
+                recovered += 1
+        print(f"live-index recovery: {recovered}/{len(cur_unmatched)} current misses resolved")
 
     # --- historic players: exact normalized match; multiple == ambiguous ---
     for r in classic:
@@ -206,8 +287,12 @@ def main() -> int:
         try:
             r = s.get(CDN_URL.format(id=pid), timeout=20)
             if r.status_code == 200 and r.headers.get("content-type", "").startswith("image"):
-                dest.write_bytes(r.content)
-                downloaded += 1
+                if hashlib.md5(r.content).hexdigest() == PLACEHOLDER_MD5:
+                    misses.append({"name": name, "slug": slug, "nba_id": pid,
+                                   "source": src, "reason": "cdn_placeholder"})
+                else:
+                    dest.write_bytes(r.content)
+                    downloaded += 1
             else:
                 misses.append({"name": name, "slug": slug, "nba_id": pid,
                                "source": src, "reason": "cdn_404"})

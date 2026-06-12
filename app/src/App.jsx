@@ -823,22 +823,22 @@ export default function App() {
                   {show ? <span style={{ flexShrink: 0, fontSize: 12, fontWeight: 700, color: C_ACCENT, border: `1px solid ${C_BORDER}`, borderRadius: 8, padding: '3px 8px' }}>{show.o} OVR</span> : null}
                 </div>
                 {show ? (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 8 }}>
                     <span style={{ fontSize: 10, color: C_MUTED, border: `1px solid ${C_BORDER}`, borderRadius: 8, padding: '2px 6px' }}>{show.p}</span>
                     <span style={{ fontSize: 10, color: C_MUTED, border: `1px solid ${C_BORDER}`, borderRadius: 8, padding: '2px 6px' }}>{show.ht}</span>
                     {show.wt ? <span style={{ fontSize: 10, color: C_MUTED, border: `1px solid ${C_BORDER}`, borderRadius: 8, padding: '2px 6px' }}>{show.wt} lbs</span> : null}
-                    {mode !== 'daily' && !spinning && pending ? (
-                      <>
-                        <button onClick={() => reroll('team')} disabled={!rerolls.team || sameTeamCount === 0} className="flex items-center justify-center gap-1 select-none btn-ghost"
-                          style={{ flex: 1, background: 'transparent', color: (rerolls.team && sameTeamCount > 0) ? C_ACCENT : C_MUTED, border: `1px solid ${(rerolls.team && sameTeamCount > 0) ? C_ACCENT : C_BORDER}`, borderRadius: 8, padding: '6px 4px', fontSize: 11, fontWeight: 600, whiteSpace: 'nowrap', cursor: (rerolls.team && sameTeamCount > 0) ? 'pointer' : 'not-allowed', opacity: (rerolls.team && sameTeamCount > 0) ? 1 : 0.45 }}>
-                          <RotateCcw size={11} /> Re-roll {shortTm(pending.tm)}
-                        </button>
-                        <button onClick={() => reroll('any')} disabled={!rerolls.any} className="flex items-center justify-center gap-1 select-none btn-ghost"
-                          style={{ flex: 1, background: 'transparent', color: rerolls.any ? C_ACCENT : C_MUTED, border: `1px solid ${rerolls.any ? C_ACCENT : C_BORDER}`, borderRadius: 8, padding: '6px 4px', fontSize: 11, fontWeight: 600, whiteSpace: 'nowrap', cursor: rerolls.any ? 'pointer' : 'not-allowed', opacity: rerolls.any ? 1 : 0.45 }}>
-                          <RotateCcw size={11} /> Re-roll anyone
-                        </button>
-                      </>
-                    ) : null}
+                  </div>
+                ) : null}
+                {mode !== 'daily' && !spinning && pending ? (
+                  <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+                    <button onClick={() => reroll('team')} disabled={!rerolls.team || sameTeamCount === 0} className="flex items-center justify-center gap-1 select-none btn-ghost"
+                      style={{ flex: 1, background: 'transparent', color: (rerolls.team && sameTeamCount > 0) ? C_ACCENT : C_MUTED, border: `1px solid ${(rerolls.team && sameTeamCount > 0) ? C_ACCENT : C_BORDER}`, borderRadius: 8, padding: '7px 8px', fontSize: 12, fontWeight: 600, whiteSpace: 'nowrap', cursor: (rerolls.team && sameTeamCount > 0) ? 'pointer' : 'not-allowed', opacity: (rerolls.team && sameTeamCount > 0) ? 1 : 0.45 }}>
+                      <RotateCcw size={12} /> Re-roll {shortTm(pending.tm)}
+                    </button>
+                    <button onClick={() => reroll('any')} disabled={!rerolls.any} className="flex items-center justify-center gap-1 select-none btn-ghost"
+                      style={{ flex: 1, background: 'transparent', color: rerolls.any ? C_ACCENT : C_MUTED, border: `1px solid ${rerolls.any ? C_ACCENT : C_BORDER}`, borderRadius: 8, padding: '7px 8px', fontSize: 12, fontWeight: 600, whiteSpace: 'nowrap', cursor: rerolls.any ? 'pointer' : 'not-allowed', opacity: rerolls.any ? 1 : 0.45 }}>
+                      <RotateCcw size={12} /> Re-roll anyone
+                    </button>
                   </div>
                 ) : null}
               </div>
