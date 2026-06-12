@@ -213,8 +213,8 @@ function TeamLogo({ tm, size }) {
 
 function Modal({ title, onClose, children }) {
   return (
-    <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(10,27,61,0.55)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: 20, zIndex: 50, overflowY: 'auto' }}>
-      <div onClick={(e) => e.stopPropagation()} style={{ background: C_SURFACE, border: `1px solid ${C_BORDER}`, borderRadius: 16, boxShadow: SHADOW, maxWidth: 520, width: '100%', maxHeight: '80vh', overflowY: 'auto', padding: 20, marginTop: '6vh' }}>
+    <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(10,27,61,0.55)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '20px 12px', zIndex: 50, overflowY: 'auto' }}>
+      <div onClick={(e) => e.stopPropagation()} style={{ background: C_SURFACE, border: `1px solid ${C_BORDER}`, borderRadius: 16, boxShadow: SHADOW, width: 'min(520px, calc(100vw - 24px))', maxHeight: '80vh', overflowY: 'auto', padding: 20, marginTop: '6vh' }}>
         <div className="flex items-center justify-between" style={{ marginBottom: 14 }}>
           <div style={{ fontSize: 16, fontWeight: 800 }}>{title}</div>
           <button onClick={onClose} aria-label="Close" className="select-none btn-ghost" style={{ background: 'transparent', color: C_MUTED, border: `1px solid ${C_BORDER}`, borderRadius: 8, padding: '4px 8px', cursor: 'pointer', lineHeight: 1 }}>
@@ -225,6 +225,17 @@ function Modal({ title, onClose, children }) {
       </div>
     </div>
   );
+}
+
+function useIsMobile() {
+  const [m, setM] = useState(() => window.matchMedia('(max-width: 600px)').matches);
+  useEffect(() => {
+    const q = window.matchMedia('(max-width: 600px)');
+    const fn = (e) => setM(e.matches);
+    q.addEventListener('change', fn);
+    return () => q.removeEventListener('change', fn);
+  }, []);
+  return m;
 }
 
 function chipColor(v) { if (v >= 80) return '#16A34A'; if (v >= 70) return '#84CC16'; if (v >= 60) return '#F59E0B'; return '#EF4444'; }
@@ -259,15 +270,16 @@ function BadgeLine({ counts }) {
   );
 }
 
-function TierPills({ counts }) {
+function TierPills({ counts, mobile }) {
   const items = counts.map((n, i) => ({ n, i })).filter((x) => x.n > 0);
   if (items.length === 0) return <div style={{ fontSize: 9, color: C_MUTED, marginTop: 4 }}>no badges</div>;
+  const w = mobile ? 13 : 15, h = mobile ? 17 : 20, fs = mobile ? 8 : 9;
   return (
     <div style={{ display: 'flex', gap: 4, marginTop: 4, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
       {items.map((x) => (
-        <span key={x.i} title={TIERS[x.i]} style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: 15, height: 20 }}>
+        <span key={x.i} title={TIERS[x.i]} style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', width: w, height: h }}>
           <img src={TIER_IMG[x.i]} alt={TIERS[x.i]} onError={(e) => { e.currentTarget.style.display = 'none'; }} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'contain' }} />
-          <span style={{ position: 'relative', fontSize: 9, fontWeight: 800, color: '#fff', textShadow: '0 1px 2px rgba(0,0,0,0.85)', lineHeight: 1 }}>{x.n}</span>
+          <span style={{ position: 'relative', fontSize: fs, fontWeight: 800, color: '#fff', textShadow: '0 1px 2px rgba(0,0,0,0.85)', lineHeight: 1 }}>{x.n}</span>
         </span>
       ))}
     </div>
@@ -297,6 +309,8 @@ export default function App() {
   const [dailyRevealed, setDailyRevealed] = useState(0);
   const [dailyPar, setDailyPar] = useState(0);
   const [dailyPractice, setDailyPractice] = useState(false);
+  const [howToOpen, setHowToOpen] = useState(false);
+  const isMobile = useIsMobile();
   const iv = useRef(null), to = useRef(null);
   const recorded = useRef(false);
   const rngRef = useRef(Math.random);
@@ -711,17 +725,17 @@ export default function App() {
 
   return (
     <div style={{ background: C_BG, color: C_TEXT, fontFamily: "'Archivo', ui-sans-serif, system-ui, sans-serif", fontVariantNumeric: 'tabular-nums', minHeight: '100%', padding: 20 }}>
-      <div style={{ maxWidth: 720, margin: '0 auto' }}>
-        <div className="flex items-center justify-between" style={{ marginBottom: 4 }}>
+      <div className="page-wrap" style={{ maxWidth: 720, margin: '0 auto' }}>
+        <div className="flex items-center justify-between" style={{ marginBottom: 4, flexWrap: 'wrap', rowGap: 6 }}>
           <div className="flex items-center gap-2">
             <span style={{ fontSize: 24, fontWeight: 900, fontStyle: 'italic', letterSpacing: '-0.02em' }}>2K</span>
             <span style={{ fontSize: 24, fontWeight: 900, fontStyle: 'italic', letterSpacing: '-0.02em', color: C_RED }}>STATLE</span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-            <div style={{ display: 'flex', border: `1px solid ${C_BORDER}`, borderRadius: 8, overflow: 'hidden' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end', marginLeft: 'auto' }}>
+            <div style={{ display: 'flex', border: `1px solid ${C_BORDER}`, borderRadius: 8, overflowX: isMobile ? 'auto' : 'hidden', overflowY: 'hidden', minWidth: 0 }}>
               {MODES.map((m) => (
                 <button key={m.id} onClick={() => switchMode(m.id)} className="select-none"
-                  style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', padding: '5px 8px', border: 'none', cursor: 'pointer', background: mode === m.id ? C_ACCENT : 'transparent', color: mode === m.id ? '#FFFFFF' : C_MUTED }}>
+                  style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', padding: '5px 8px', border: 'none', cursor: 'pointer', flexShrink: 0, background: mode === m.id ? C_ACCENT : 'transparent', color: mode === m.id ? '#FFFFFF' : C_MUTED }}>
                   {m.label}
                 </button>
               ))}
@@ -739,11 +753,19 @@ export default function App() {
           <span style={{ flex: 1, background: C_ACCENT }} />
           <span style={{ flex: 1, background: C_RED }} />
         </div>
-        <p style={{ fontSize: 13, color: C_MUTED, margin: '0 0 16px', lineHeight: 1.5 }}>
-          {mode === 'daily'
+        {(() => {
+          const text = mode === 'daily'
             ? "Today's Gauntlet: reveal eight players one at a time and lock each into an open slot before the next reveal. No re-rolls — beat par. One counting attempt per day."
-            : 'Spin a player, then lock him into any open slot — position and frame, intangibles, or his rating in one category. You get two re-rolls a game: one for another player on his team, one for anyone in the league. Ratings stay hidden until you commit, and your overall stays hidden until every slot is filled.'}
-        </p>
+            : 'Spin a player, then lock him into any open slot — position and frame, intangibles, or his rating in one category. You get two re-rolls a game: one for another player on his team, one for anyone in the league. Ratings stay hidden until you commit, and your overall stays hidden until every slot is filled.';
+          const para = <p style={{ fontSize: isMobile ? 12 : 13, color: C_MUTED, margin: '0 0 16px', lineHeight: 1.5 }}>{text}</p>;
+          if (loadGames().length === 0) return para;
+          return (
+            <div style={{ marginBottom: howToOpen ? 0 : 16 }}>
+              <div onClick={() => setHowToOpen((o) => !o)} style={{ fontSize: 12, color: C_ACCENT, cursor: 'pointer', marginBottom: howToOpen ? 8 : 0 }}>How to play</div>
+              {howToOpen ? para : null}
+            </div>
+          );
+        })()}
 
         {challengeBanner ? (
           <div style={{ fontSize: 12, fontWeight: 700, color: C_ACCENT, marginBottom: 10 }}>Challenge seed {challengeBanner}</div>
@@ -754,6 +776,38 @@ export default function App() {
 
         <div className="rollzone">
           {(pending || spinning) ? (
+            isMobile ? (
+              <div style={{ background: C_SURFACE, border: `1px solid ${C_ACCENT}`, borderRadius: 14, padding: '10px 12px', boxShadow: SHADOW, display: 'flex', flexDirection: 'column' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  {show ? <Headshot p={show} size={52} /> : null}
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    <div style={{ fontSize: 9, color: C_MUTED, textTransform: 'uppercase', letterSpacing: '0.08em', whiteSpace: 'nowrap' }}>{spinning ? <><span className="live-dot" />Spinning…</> : 'You rolled'}</div>
+                    <div key={show ? show.n : 'none'} className="tick" style={{ fontSize: 15, fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{show ? show.n : '—'}</div>
+                    <div style={{ fontSize: 10, color: C_MUTED, marginTop: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{show ? show.tm : ' '}</div>
+                  </div>
+                  {show ? <span style={{ flexShrink: 0, fontSize: 12, fontWeight: 700, color: C_ACCENT, border: `1px solid ${C_BORDER}`, borderRadius: 8, padding: '3px 8px' }}>{show.o} OVR</span> : null}
+                </div>
+                {show ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 8, flexWrap: 'wrap' }}>
+                    <span style={{ fontSize: 10, color: C_MUTED, border: `1px solid ${C_BORDER}`, borderRadius: 8, padding: '2px 6px' }}>{show.p}</span>
+                    <span style={{ fontSize: 10, color: C_MUTED, border: `1px solid ${C_BORDER}`, borderRadius: 8, padding: '2px 6px' }}>{show.ht}</span>
+                    {show.wt ? <span style={{ fontSize: 10, color: C_MUTED, border: `1px solid ${C_BORDER}`, borderRadius: 8, padding: '2px 6px' }}>{show.wt} lbs</span> : null}
+                    {mode !== 'daily' && !spinning && pending ? (
+                      <>
+                        <button onClick={() => reroll('team')} disabled={!rerolls.team || sameTeamCount === 0} className="flex items-center justify-center gap-1 select-none btn-ghost"
+                          style={{ flex: 1, background: 'transparent', color: (rerolls.team && sameTeamCount > 0) ? C_ACCENT : C_MUTED, border: `1px solid ${(rerolls.team && sameTeamCount > 0) ? C_ACCENT : C_BORDER}`, borderRadius: 8, padding: '6px 4px', fontSize: 11, fontWeight: 600, cursor: (rerolls.team && sameTeamCount > 0) ? 'pointer' : 'not-allowed', opacity: (rerolls.team && sameTeamCount > 0) ? 1 : 0.45 }}>
+                          <RotateCcw size={11} /> Re-roll {pending.tm}
+                        </button>
+                        <button onClick={() => reroll('any')} disabled={!rerolls.any} className="flex items-center justify-center gap-1 select-none btn-ghost"
+                          style={{ flex: 1, background: 'transparent', color: rerolls.any ? C_ACCENT : C_MUTED, border: `1px solid ${rerolls.any ? C_ACCENT : C_BORDER}`, borderRadius: 8, padding: '6px 4px', fontSize: 11, fontWeight: 600, cursor: rerolls.any ? 'pointer' : 'not-allowed', opacity: rerolls.any ? 1 : 0.45 }}>
+                          <RotateCcw size={11} /> Re-roll anyone
+                        </button>
+                      </>
+                    ) : null}
+                  </div>
+                ) : null}
+              </div>
+            ) : (
             <div style={{ height: '100%', background: C_SURFACE, border: `1px solid ${C_ACCENT}`, borderRadius: 14, padding: '12px 16px', boxShadow: SHADOW, display: 'flex', alignItems: 'center', gap: 14 }}>
               {show ? <Headshot p={show} size={86} /> : null}
               <div style={{ minWidth: 0 }}>
@@ -784,6 +838,7 @@ export default function App() {
                 ) : <span />}
               </div>
             </div>
+            )
           ) : (
             <div className="flex items-center justify-center" style={{ height: '100%', color: C_MUTED, fontSize: 13 }}>
               Hit spin to roll a player.
@@ -804,24 +859,24 @@ export default function App() {
                   boxShadow: SHADOW,
                   background: C_SURFACE,
                   border: `1px solid ${selectable ? C_ACCENT : C_BORDER}`,
-                  borderRadius: 12, padding: 12, minHeight: 172,
+                  borderRadius: 12, padding: isMobile ? 10 : 12, minHeight: isMobile ? 136 : 172,
                   cursor: selectable ? 'pointer' : 'default',
                   opacity: pending && pl ? 0.5 : 1,
                   display: 'flex', flexDirection: 'column', justifyContent: 'space-between',
                 }}
               >
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 6 }}>
-                  <div style={{ fontSize: 11, fontWeight: 600, color: C_ACCENT, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{s.label}</div>
+                  <div style={{ fontSize: isMobile ? 10 : 11, fontWeight: 600, color: C_ACCENT, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{s.label}</div>
                   {pl ? (
                     s.kind === 'arch' ? <span style={{ fontSize: 22, fontWeight: 800, lineHeight: 1 }}>{pl.p}</span>
-                      : s.kind === 'int' ? <span style={{ fontSize: 26, fontWeight: 800, lineHeight: 1, color: numColor(pl.ig) }}>{pl.ig}</span>
-                        : <span style={{ fontSize: 26, fontWeight: 800, lineHeight: 1, color: numColor(pl.c[s.ci]) }}>{pl.c[s.ci]}</span>
+                      : s.kind === 'int' ? <span style={{ fontSize: isMobile ? 22 : 26, fontWeight: 800, lineHeight: 1, color: numColor(pl.ig) }}>{pl.ig}</span>
+                        : <span style={{ fontSize: isMobile ? 22 : 26, fontWeight: 800, lineHeight: 1, color: numColor(pl.c[s.ci]) }}>{pl.c[s.ci]}</span>
                   ) : null}
                 </div>
                 {pl ? (
                   <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 6, marginTop: 8 }}>
                     <div style={{ minWidth: 0 }}>
-                      <Headshot p={pl} size={88} />
+                      <Headshot p={pl} size={isMobile ? 56 : 88} />
                       <div style={{ fontSize: 10, color: C_MUTED, marginTop: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{pl.n}</div>
                     </div>
                     {s.kind === 'arch' ? (
@@ -831,7 +886,7 @@ export default function App() {
                         {pl.ws ? <div>WS {pl.ws}</div> : null}
                       </div>
                     ) : s.kind === 'cat' ? (
-                      <TierPills counts={(pl.b && pl.b[CATS[s.ci].key]) || [0, 0, 0, 0]} />
+                      <TierPills counts={(pl.b && pl.b[CATS[s.ci].key]) || [0, 0, 0, 0]} mobile={isMobile} />
                     ) : null}
                   </div>
                 ) : (
@@ -842,6 +897,7 @@ export default function App() {
           })}
         </div>
 
+        <div className="actionbar">
         {mode === 'daily' ? (
           <button
             onClick={reveal}
@@ -875,6 +931,7 @@ export default function App() {
             {spinning ? 'Spinning…' : pending ? 'Lock your player into a slot' : 'Spin'}
           </button>
         )}
+        </div>
       </div>
 
       {showStats ? (() => {

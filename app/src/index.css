@@ -61,9 +61,17 @@ button { font-family: inherit; }
 .slot-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 16px; }
 .end-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 @media (max-width: 600px) {
-  .rollzone { height: auto; min-height: 122px; }
+  .rollzone { height: auto; min-height: 118px; }
   .slot-grid { grid-template-columns: repeat(2, 1fr); }
   .end-grid { grid-template-columns: 1fr; }
+  .actionbar {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 50;
+    background: #FFFFFF; border-top: 1px solid #D4DCEC;
+    padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+    box-shadow: 0 -6px 16px rgba(10, 27, 61, 0.08);
+  }
+  .actionbar button { width: 100%; }
+  .page-wrap { padding-bottom: 84px; }
 }
 @media (min-width: 601px) and (max-width: 760px) {
   .end-grid { grid-template-columns: repeat(2, 1fr); }
