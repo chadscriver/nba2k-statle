@@ -91,7 +91,11 @@ def make_entry(row, tm, name, badge_cat, have_headshot):
         if cat in counts and val in TIER_IDX:
             counts[cat][TIER_IDX[val]] += 1
     e["b"] = counts
-    slug = slugify(row["name"])
+    # Headshots are saved under the era-free name slug (one image per human), so
+    # strip any era tag (e.g. "Michael Jordan ('96)" -> "michael-jordan") before
+    # the lookup — matching how fetch_headshots.py names the files.
+    base_name = re.sub(r"\s*\('\d{2}\)\s*$", "", name)
+    slug = slugify(base_name)
     if have_headshot(slug):
         e["img"] = f"headshots/{slug}.png"
     wt = (row.get("weight_lbs") or "").strip()

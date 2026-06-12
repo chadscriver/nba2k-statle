@@ -48,6 +48,23 @@ OVERRIDES: dict[str, int] = {
     "Alexandre Sarr": 1642259,  # listed as "Alex Sarr" in the static roster
 }
 
+# Known name mismatches: the dataset's name -> the name nba_api lists the same
+# player under. The headshot is still saved under the original (slugified) name
+# so the pool generator finds it.
+ALIASES: dict[str, str] = {
+    "Penny Hardaway": "Anfernee Hardaway",
+    "J.R. Smith": "JR Smith",
+    "C.J. McCollum": "CJ McCollum",
+    "R.J. Barrett": "RJ Barrett",
+    "Stanislav Medvedenko": "Slava Medvedenko",
+    "Jeff Pendegraph": "Jeff Ayres",
+    "World B. Free": "World Free",
+}
+
+# Ambiguous historic names from seasons before this year are resolved to the
+# legacy (smallest, i.e. oldest) candidate NBA id rather than left for review.
+LEGACY_BEFORE = 2010
+
 SUFFIXES = {"jr", "sr", "ii", "iii", "iv", "v"}
 
 
@@ -79,6 +96,15 @@ def pick_active(cands):
     return (active or cands)[0]
 
 
+def alias_id(name, active_idx, all_idx):
+    """Resolve a known alias to its nba_api id, or None if the target is absent."""
+    target = ALIASES.get(name)
+    if not target:
+        return None
+    cands = active_idx.get(normalize(target)) or all_idx.get(normalize(target))
+    return pick_active(cands)["id"] if cands else None
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--dry-run", action="store_true",
@@ -108,6 +134,10 @@ def main() -> int:
         if name in OVERRIDES:
             resolved[name] = (OVERRIDES[name], slugify(name), "current")
             continue
+        aid = alias_id(name, active_idx, all_idx)
+        if aid is not None:
+            resolved[name] = (aid, slugify(name), "current")
+            continue
         norm = normalize(name)
         cands = active_idx.get(norm) or all_idx.get(norm)
         if cands:
@@ -124,15 +154,24 @@ def main() -> int:
         if name in OVERRIDES:
             resolved[name] = (OVERRIDES[name], slugify(name), "classic")
             continue
+        aid = alias_id(name, active_idx, all_idx)
+        if aid is not None:
+            resolved[name] = (aid, slugify(name), "classic")
+            continue
         norm = normalize(name)
         cands = all_idx.get(norm, [])
         ids = sorted({c["id"] for c in cands})
         if len(ids) == 1:
             resolved[name] = (ids[0], slugify(name), "classic")
         elif len(ids) > 1:
-            ambiguous[name] = {"name": name, "team": r.get("classic_team", ""),
-                               "season": r.get("season", ""),
-                               "candidate_ids": " ".join(str(i) for i in ids)}
+            season = r.get("season", "")
+            start_year = int(season[:4]) if season[:4].isdigit() else 9999
+            if start_year < LEGACY_BEFORE:  # legacy era -> smallest (oldest) id
+                resolved[name] = (ids[0], slugify(name), "classic")
+            else:
+                ambiguous[name] = {"name": name, "team": r.get("classic_team", ""),
+                                   "season": season,
+                                   "candidate_ids": " ".join(str(i) for i in ids)}
         else:
             no_match[name] = {"name": name, "slug": slugify(name),
                               "nba_id": "", "source": "classic", "reason": "no_nba_match"}
