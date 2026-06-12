@@ -165,6 +165,27 @@ const SLOTS = [
 const SHADOW = '0 1px 2px rgba(10,27,61,0.05), 0 12px 28px -16px rgba(10,27,61,0.16)';
 const C_BG = '#F4F6FB', C_SURFACE = '#FFFFFF', C_SURFACE2 = '#EEF2F9', C_BORDER = '#D4DCEC', C_TEXT = '#0A1B3D', C_MUTED = '#5C6B8C', C_ACCENT = '#1D428A', C_RED = '#C8102E';
 
+const FR_ABBR = {
+  'Atlanta Hawks': 'ATL', 'Boston Celtics': 'BOS', 'Brooklyn Nets': 'BKN',
+  'Charlotte Hornets': 'CHA', 'Chicago Bulls': 'CHI', 'Cleveland Cavaliers': 'CLE',
+  'Dallas Mavericks': 'DAL', 'Denver Nuggets': 'DEN', 'Detroit Pistons': 'DET',
+  'Golden State Warriors': 'GSW', 'Houston Rockets': 'HOU', 'Indiana Pacers': 'IND',
+  'Los Angeles Clippers': 'LAC', 'Los Angeles Lakers': 'LAL', 'Memphis Grizzlies': 'MEM',
+  'Miami Heat': 'MIA', 'Milwaukee Bucks': 'MIL', 'Minnesota Timberwolves': 'MIN',
+  'New Jersey Nets': 'NJN', 'New Orleans Pelicans': 'NOP', 'New York Knicks': 'NYK',
+  'Oklahoma City Thunder': 'OKC', 'Orlando Magic': 'ORL', 'Philadelphia 76ers': 'PHI',
+  'Phoenix Suns': 'PHX', 'Portland Trail Blazers': 'POR', 'Sacramento Kings': 'SAC',
+  'San Antonio Spurs': 'SAS', 'Seattle Supersonics': 'SEA', 'Toronto Raptors': 'TOR',
+  'Utah Jazz': 'UTA', 'Washington Wizards': 'WAS',
+};
+
+// "1986-87 Los Angeles Lakers" -> "'87 LAL"; current abbrevs pass through.
+function shortTm(tm) {
+  const m = /^(\d{4})-(\d{2})\s+(.+)$/.exec(tm || '');
+  if (!m) return tm;
+  return `'${m[2]} ${FR_ABBR[m[3]] || m[3]}`;
+}
+
 function Headshot({ p, size }) {
   const hs = headshotSrc(p);
   const logo = teamLogoSrc(p && p.tm);
@@ -174,7 +195,7 @@ function Headshot({ p, size }) {
   return (
     <span data-hswrap="1" style={{ position: 'relative', display: 'inline-block', width: size, height: size, flexShrink: 0 }}>
       <span style={{ position: 'absolute', inset: 0, borderRadius: rad, background: C_SURFACE2, border: `1px solid ${C_BORDER}`, overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        {logo ? <img src={logo} alt="" onError={(e) => { e.currentTarget.style.display = 'none'; }} style={{ width: '66%', height: '66%', objectFit: 'contain' }} /> : null}
+        {logo ? <img src={logo} alt="" data-fallbacklogo="1" onError={(e) => { e.currentTarget.style.display = 'none'; }} style={{ width: '66%', height: '66%', objectFit: 'contain', display: hs ? 'none' : 'block' }} /> : null}
         {hs ? (
           <img
             src={hs}
@@ -184,6 +205,8 @@ function Headshot({ p, size }) {
               const wrap = e.currentTarget.closest('[data-hswrap]');
               const bd = wrap && wrap.querySelector('[data-teambadge]');
               if (bd) bd.style.display = 'none';
+              const fb = wrap && wrap.querySelector('[data-fallbacklogo]');
+              if (fb) fb.style.display = 'block';
             }}
             style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 18%' }}
           />
@@ -211,10 +234,10 @@ function TeamLogo({ tm, size }) {
   );
 }
 
-function Modal({ title, onClose, children }) {
+function Modal({ title, onClose, children, width }) {
   return (
     <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(10,27,61,0.55)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '20px 12px', zIndex: 50, overflowY: 'auto' }}>
-      <div onClick={(e) => e.stopPropagation()} style={{ background: C_SURFACE, border: `1px solid ${C_BORDER}`, borderRadius: 16, boxShadow: SHADOW, width: 'min(520px, calc(100vw - 24px))', maxHeight: '80vh', overflowY: 'auto', padding: 20, marginTop: '6vh' }}>
+      <div onClick={(e) => e.stopPropagation()} style={{ background: C_SURFACE, border: `1px solid ${C_BORDER}`, borderRadius: 16, boxShadow: SHADOW, width: width || 'min(520px, calc(100vw - 24px))', maxHeight: '80vh', overflowY: 'auto', padding: 20, marginTop: '6vh' }}>
         <div className="flex items-center justify-between" style={{ marginBottom: 14 }}>
           <div style={{ fontSize: 16, fontWeight: 800 }}>{title}</div>
           <button onClick={onClose} aria-label="Close" className="select-none btn-ghost" style={{ background: 'transparent', color: C_MUTED, border: `1px solid ${C_BORDER}`, borderRadius: 8, padding: '4px 8px', cursor: 'pointer', lineHeight: 1 }}>
@@ -222,6 +245,21 @@ function Modal({ title, onClose, children }) {
           </button>
         </div>
         {children}
+      </div>
+    </div>
+  );
+}
+
+function ModalMini({ pl, slot, grey }) {
+  const src = headshotSrc(pl);
+  const value = slot.kind === 'arch' ? pl.p : slot.kind === 'int' ? pl.ig : pl.c[slot.ci];
+  const vColor = grey ? C_MUTED : slot.kind === 'arch' ? C_TEXT : numColor(value);
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
+      {src ? <img src={src} alt="" onError={(e) => { e.currentTarget.style.display = 'none'; }} style={{ width: 26, height: 26, borderRadius: 7, objectFit: 'cover', objectPosition: 'center 18%', flexShrink: 0, filter: grey ? 'grayscale(1)' : 'none', opacity: grey ? 0.5 : 1 }} /> : null}
+      <div style={{ minWidth: 0 }}>
+        <div style={{ fontSize: 10, lineHeight: 1.25, fontWeight: 600, color: grey ? C_MUTED : C_TEXT, wordBreak: 'break-word' }}>{pl.n}</div>
+        <div style={{ fontSize: 12, fontWeight: 800, color: vColor }}>{value}</div>
       </div>
     </div>
   );
@@ -629,7 +667,7 @@ export default function App() {
                     <div style={{ fontSize: 13, fontWeight: 800, color: C_RED, marginTop: 6 }}>Perfect build</div>
                   ) : (
                     <div style={{ fontSize: 13, color: C_MUTED, marginTop: 6 }}>
-                      Best possible: {analysis.bestRes.overall} — you left <strong>{analysis.bestRes.overall - r.overall}</strong> on the table
+                      Best possible: {analysis.bestRes.overall}
                     </div>
                   )) : null}
                   <div className="fade-late" style={{ fontSize: 13, fontWeight: 700, color: C_RED, marginTop: 4 }}>{tierFor(r.overall)}</div>
@@ -693,21 +731,18 @@ export default function App() {
             ) : null}
           </div>
           {showBest && analysis ? (
-            <Modal title={`Best possible build — ${analysis.bestRes.overall} OVR`} onClose={() => setShowBest(false)}>
+            <Modal title={`Best possible build — ${analysis.bestRes.overall} OVR`} onClose={() => setShowBest(false)} width="min(440px, calc(100vw - 24px))">
               {SLOTS.map((s) => {
                 const you = slots[s.id], opt = analysis.optimalBySlot[s.id];
-                const same = you.n === opt.n;
+                const correct = you.n === opt.n;
                 return (
-                  <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '9px 10px', borderLeft: `3px solid ${same ? 'transparent' : C_RED}`, borderBottom: `1px solid ${C_BORDER}` }}>
-                    <div style={{ width: 116, flexShrink: 0, fontSize: 10, fontWeight: 700, color: C_ACCENT, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{s.label}</div>
-                    {same ? (
-                      <div style={{ flex: 1, fontSize: 13 }}>{you.n} <span style={{ color: C_RED, fontWeight: 800 }}>✓</span></div>
-                    ) : (
-                      <>
-                        <div style={{ flex: 1, minWidth: 0, fontSize: 13, color: C_MUTED, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{you.n}</div>
-                        <div style={{ flex: 1, minWidth: 0, fontSize: 13, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{opt.n}</div>
-                      </>
-                    )}
+                  <div key={s.id} style={{ padding: '8px 2px', borderBottom: `1px solid ${C_BORDER}` }}>
+                    <div style={{ fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.06em', color: C_MUTED, marginBottom: 4 }}>{s.label}</div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 18px 1fr', gap: 6, alignItems: 'center' }}>
+                      <ModalMini pl={you} slot={s} grey={!correct} />
+                      <div style={{ textAlign: 'center', fontSize: 14, fontWeight: 800, color: correct ? '#15803D' : C_RED }}>→</div>
+                      <ModalMini pl={opt} slot={s} grey={false} />
+                    </div>
                   </div>
                 );
               })}
@@ -783,7 +818,7 @@ export default function App() {
                   <div style={{ minWidth: 0, flex: 1 }}>
                     <div style={{ fontSize: 9, color: C_MUTED, textTransform: 'uppercase', letterSpacing: '0.08em', whiteSpace: 'nowrap' }}>{spinning ? <><span className="live-dot" />Spinning…</> : 'You rolled'}</div>
                     <div key={show ? show.n : 'none'} className="tick" style={{ fontSize: 15, fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{show ? show.n : '—'}</div>
-                    <div style={{ fontSize: 10, color: C_MUTED, marginTop: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{show ? show.tm : ' '}</div>
+                    <div style={{ fontSize: 10, color: C_MUTED, marginTop: 1, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{show ? shortTm(show.tm) : ' '}</div>
                   </div>
                   {show ? <span style={{ flexShrink: 0, fontSize: 12, fontWeight: 700, color: C_ACCENT, border: `1px solid ${C_BORDER}`, borderRadius: 8, padding: '3px 8px' }}>{show.o} OVR</span> : null}
                 </div>
@@ -795,11 +830,11 @@ export default function App() {
                     {mode !== 'daily' && !spinning && pending ? (
                       <>
                         <button onClick={() => reroll('team')} disabled={!rerolls.team || sameTeamCount === 0} className="flex items-center justify-center gap-1 select-none btn-ghost"
-                          style={{ flex: 1, background: 'transparent', color: (rerolls.team && sameTeamCount > 0) ? C_ACCENT : C_MUTED, border: `1px solid ${(rerolls.team && sameTeamCount > 0) ? C_ACCENT : C_BORDER}`, borderRadius: 8, padding: '6px 4px', fontSize: 11, fontWeight: 600, cursor: (rerolls.team && sameTeamCount > 0) ? 'pointer' : 'not-allowed', opacity: (rerolls.team && sameTeamCount > 0) ? 1 : 0.45 }}>
-                          <RotateCcw size={11} /> Re-roll {pending.tm}
+                          style={{ flex: 1, background: 'transparent', color: (rerolls.team && sameTeamCount > 0) ? C_ACCENT : C_MUTED, border: `1px solid ${(rerolls.team && sameTeamCount > 0) ? C_ACCENT : C_BORDER}`, borderRadius: 8, padding: '6px 4px', fontSize: 11, fontWeight: 600, whiteSpace: 'nowrap', cursor: (rerolls.team && sameTeamCount > 0) ? 'pointer' : 'not-allowed', opacity: (rerolls.team && sameTeamCount > 0) ? 1 : 0.45 }}>
+                          <RotateCcw size={11} /> Re-roll {shortTm(pending.tm)}
                         </button>
                         <button onClick={() => reroll('any')} disabled={!rerolls.any} className="flex items-center justify-center gap-1 select-none btn-ghost"
-                          style={{ flex: 1, background: 'transparent', color: rerolls.any ? C_ACCENT : C_MUTED, border: `1px solid ${rerolls.any ? C_ACCENT : C_BORDER}`, borderRadius: 8, padding: '6px 4px', fontSize: 11, fontWeight: 600, cursor: rerolls.any ? 'pointer' : 'not-allowed', opacity: rerolls.any ? 1 : 0.45 }}>
+                          style={{ flex: 1, background: 'transparent', color: rerolls.any ? C_ACCENT : C_MUTED, border: `1px solid ${rerolls.any ? C_ACCENT : C_BORDER}`, borderRadius: 8, padding: '6px 4px', fontSize: 11, fontWeight: 600, whiteSpace: 'nowrap', cursor: rerolls.any ? 'pointer' : 'not-allowed', opacity: rerolls.any ? 1 : 0.45 }}>
                           <RotateCcw size={11} /> Re-roll anyone
                         </button>
                       </>
@@ -813,7 +848,7 @@ export default function App() {
               <div style={{ minWidth: 0 }}>
                 <div style={{ fontSize: 11, color: C_MUTED, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{spinning ? <><span className="live-dot" />Spinning…</> : 'You rolled'}</div>
                 <div key={show ? show.n : 'none'} className="tick" style={{ fontSize: 19, fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{show ? show.n : '—'}</div>
-                <div style={{ fontSize: 11, color: C_MUTED, marginTop: 1 }}>{show ? show.tm : '\u00A0'}</div>
+                <div style={{ fontSize: 11, color: C_MUTED, marginTop: 1 }}>{show ? shortTm(show.tm) : '\u00A0'}</div>
               </div>
               <div style={{ marginLeft: 'auto', alignSelf: 'stretch', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', justifyContent: 'space-between', padding: '3px 0', flexShrink: 0 }}>
                 {show ? (
@@ -828,7 +863,7 @@ export default function App() {
                   <div className="flex items-center" style={{ gap: 8 }}>
                     <button onClick={() => reroll('team')} disabled={!rerolls.team || sameTeamCount === 0} className="flex items-center gap-1 select-none btn-ghost"
                       style={{ background: 'transparent', color: (rerolls.team && sameTeamCount > 0) ? C_ACCENT : C_MUTED, border: `1px solid ${(rerolls.team && sameTeamCount > 0) ? C_ACCENT : C_BORDER}`, borderRadius: 8, padding: '5px 10px', fontSize: 12, fontWeight: 600, cursor: (rerolls.team && sameTeamCount > 0) ? 'pointer' : 'not-allowed', opacity: (rerolls.team && sameTeamCount > 0) ? 1 : 0.45 }}>
-                      <RotateCcw size={12} /> Re-roll {pending.tm}
+                      <RotateCcw size={12} /> Re-roll {shortTm(pending.tm)}
                     </button>
                     <button onClick={() => reroll('any')} disabled={!rerolls.any} className="flex items-center gap-1 select-none btn-ghost"
                       style={{ background: 'transparent', color: rerolls.any ? C_ACCENT : C_MUTED, border: `1px solid ${rerolls.any ? C_ACCENT : C_BORDER}`, borderRadius: 8, padding: '5px 10px', fontSize: 12, fontWeight: 600, cursor: rerolls.any ? 'pointer' : 'not-allowed', opacity: rerolls.any ? 1 : 0.45 }}>

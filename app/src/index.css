@@ -61,7 +61,7 @@ button { font-family: inherit; }
 .slot-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 16px; }
 .end-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 @media (max-width: 600px) {
-  .rollzone { height: auto; min-height: 118px; }
+  .rollzone { height: auto; min-height: 118px; position: sticky; top: 0; z-index: 40; background: #F4F6FB; padding-top: 6px; }
   .slot-grid { grid-template-columns: repeat(2, 1fr); }
   .end-grid { grid-template-columns: 1fr; }
   .actionbar {
