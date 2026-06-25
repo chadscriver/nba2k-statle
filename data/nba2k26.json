@@ -6581,7 +6581,7 @@
   },
   {
     "slug": "alexandre-sarr",
-    "name": "Alexandre Sarr",
+    "name": "Alex Sarr",
     "team": "Washington Wizards",
     "pos": "C / PF",
     "overall": 84,
@@ -7521,7 +7521,7 @@
   },
   {
     "slug": "cj-mccollum",
-    "name": "C.J. McCollum",
+    "name": "CJ McCollum",
     "team": "Atlanta Hawks",
     "pos": "PG / SG",
     "overall": 83,
@@ -8273,7 +8273,7 @@
   },
   {
     "slug": "rj-barrett",
-    "name": "R.J. Barrett",
+    "name": "RJ Barrett",
     "team": "Toronto Raptors",
     "pos": "SG / SF",
     "overall": 83,
@@ -13725,7 +13725,7 @@
   },
   {
     "slug": "bobby-portis",
-    "name": "Bobby Portis Jr.",
+    "name": "Bobby Portis",
     "team": "Miami Heat",
     "pos": "C / PF",
     "overall": 80,
@@ -20588,7 +20588,7 @@
   {
     "slug": "isaiah-stewart",
     "name": "Isaiah Stewart",
-    "team": "Detroit Pistons",
+    "team": "Memphis Grizzlies",
     "pos": "C / PF",
     "overall": 78,
     "height": "6'8\"",
@@ -21997,7 +21997,7 @@
   },
   {
     "slug": "ronald-holland",
-    "name": "Ron Holland",
+    "name": "Ronald Holland II",
     "team": "Detroit Pistons",
     "pos": "PF / SF",
     "overall": 78,
@@ -34970,7 +34970,7 @@
   {
     "slug": "kam-jones",
     "name": "Kam Jones",
-    "team": "Indiana Pacers",
+    "team": "Chicago Bulls",
     "pos": "SG / PG",
     "overall": 74,
     "height": "6'4\"",
@@ -42771,7 +42771,7 @@
   },
   {
     "slug": "xavier-tillman",
-    "name": "Xavier Tillman Sr.",
+    "name": "Xavier Tillman",
     "team": "Charlotte Hornets",
     "pos": "C / PF",
     "overall": 72,
@@ -42865,7 +42865,7 @@
   },
   {
     "slug": "yuki-kawamura",
-    "name": "Yuki  Kawamura",
+    "name": "Yuki Kawamura",
     "team": "Chicago Bulls",
     "pos": "PG",
     "overall": 72,
@@ -43053,7 +43053,7 @@
   },
   {
     "slug": "bronny-james",
-    "name": "Bronny James Jr.",
+    "name": "Bronny James",
     "team": "Los Angeles Lakers",
     "pos": "PG / SG",
     "overall": 71,
@@ -43147,7 +43147,7 @@
   },
   {
     "slug": "david-jones-garcia",
-    "name": "David Jones-Garcia",
+    "name": "David Jones Garcia",
     "team": "San Antonio Spurs",
     "pos": "SG / PG",
     "overall": 71,
@@ -45497,7 +45497,7 @@
   },
   {
     "slug": "tyty-washington",
-    "name": "TyTy Washington",
+    "name": "TyTy Washington Jr.",
     "team": "Los Angeles Clippers",
     "pos": "PG / SG",
     "overall": 70,
@@ -47754,7 +47754,7 @@
   {
     "slug": "hayden-gray",
     "name": "Hayden Gray",
-    "team": null,
+    "team": "Utah Jazz",
     "pos": "SG / PG",
     "overall": 68,
     "height": "6'4\"",
@@ -48318,7 +48318,7 @@
   {
     "slug": "keshon-gilbert",
     "name": "Keshon Gilbert",
-    "team": "Atlanta Hawks",
+    "team": null,
     "pos": "SG / SF",
     "overall": 68,
     "height": "6'4\"",
